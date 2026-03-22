@@ -99,7 +99,7 @@ async fn run_worker(store: Store, mut receiver: tokio::sync::mpsc::Receiver<Inst
                         } else {
                             Some(cfg.from_name.clone())
                         },
-                        if cfg.from_mail.is_empty() {
+                        if !cfg.from_mail.is_empty() {
                             cfg.from_mail.clone()
                         } else {
                             cfg.username.clone()

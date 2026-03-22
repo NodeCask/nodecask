@@ -7,7 +7,7 @@ use crate::store::link::LinkCollection;
 use crate::store::system::{InjectionConfig, Website};
 use crate::store::user::{User, UserContinuousAccessDays};
 use crate::store::Store;
-use crate::{daemon, t};
+use crate::{daemon, t, t_owned};
 use askama::Template;
 use axum::extract::OptionalFromRequestParts;
 use axum::http::HeaderMap;
@@ -351,24 +351,24 @@ impl VContext {
                 // 是今天
                 let secs = duration.num_seconds();
                 if secs < 60 {
-                    "刚刚".to_string()
+                    t_owned!(self, "common.just_now")
                 } else if secs < 3600 {
-                    format!("{}分钟前", duration.num_minutes())
+                    t_owned!(self, "common.minutes_ago", n = duration.num_minutes())
                 } else {
-                    format!("{}小时前", duration.num_hours())
+                    t_owned!(self, "common.hours_ago", n = duration.num_hours())
                 }
             }
             1 => {
                 // 是昨天
-                format!("昨天 {}", target.format("%H:%M"))
+                t_owned!(self, "common.yesterday", time = target.format("%H:%M"))
             }
             2 => {
                 // 是前天
-                format!("前天 {}", target.format("%H:%M"))
+                t_owned!(self, "common.day_before_yesterday", time = target.format("%H:%M"))
             }
             _ => {
                 // 3到7天之间
-                format!("{}天前", days_diff)
+                t_owned!(self, "common.days_ago", n = days_diff)
             }
         }
     }
@@ -391,7 +391,7 @@ pub struct Context {
 }
 impl Context {
     pub fn err<T: Into<WebError>>(&self) -> impl FnOnce(T) -> WebError {
-        self.err_with_title("系统异常")
+        self.err_with_title(t!(self, "common.system_error"))
     }
     pub fn err_with_title<T: Into<WebError>>(
         &self,
@@ -432,22 +432,22 @@ impl Context {
         }
     }
     pub fn error(&self, message: impl AsRef<str>) -> ErrorTemplate {
-        ErrorTemplate::error(message.as_ref()).with_context(self.context(self.title.clone()))
+        ErrorTemplate::error(message.as_ref()).with_context(self.context(t_owned!(self, "common.error_title")))
     }
     pub fn info(&self, message: impl AsRef<str>) -> ErrorTemplate {
-        ErrorTemplate::info(message.as_ref()).with_context(self.context(self.title.clone()))
+        ErrorTemplate::info(message.as_ref()).with_context(self.context(t_owned!(self, "common.system_notice")))
     }
     pub fn success(&self, message: impl AsRef<str>) -> ErrorTemplate {
-        ErrorTemplate::success(message.as_ref()).with_context(self.context(self.title.clone()))
+        ErrorTemplate::success(message.as_ref()).with_context(self.context(t_owned!(self, "common.operation_complete")))
     }
     pub fn not_found(&self) -> crate::home::page::NotFoundTemplate {
         crate::home::page::NotFoundTemplate {
-            ctx: self.context("页面未找到".to_string()),
+            ctx: self.context(t_owned!(self, "common.page_not_found")),
         }
     }
     pub fn internal_error(&self) -> crate::home::page::InternalErrorTemplate {
         crate::home::page::InternalErrorTemplate {
-            ctx: self.context("服务器内部错误".to_string()),
+            ctx: self.context(t_owned!(self, "common.internal_error")),
         }
     }
 
@@ -636,13 +636,17 @@ impl<E: Error + 'static> From<E> for WebError {
 impl IntoResponse for WebError {
     fn into_response(self) -> Response {
         match self {
-            WebError::DB(ctx, err) => ErrorTemplate {
-                level: "error",
-                message: format!("数据库读写异常: {}", err.to_string()),
-                return_url: None,
-                ctx: ctx.unwrap_or_default(),
+            WebError::DB(ctx, err) => {
+                let vctx = ctx.unwrap_or_default();
+                let message = t_owned!(vctx, "common.db_error", err = err.to_string());
+                ErrorTemplate {
+                    level: "error",
+                    message,
+                    return_url: None,
+                    ctx: vctx,
+                }
+                .into_response()
             }
-            .into_response(),
             WebError::Other(ctx, err) => ErrorTemplate {
                 level: "error",
                 message: err,
