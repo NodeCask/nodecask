@@ -1,0 +1,29 @@
+{% extends "../home/layout.html" %}
+{% block content %}
+<div class="box error-message">
+    <div class="cell error-header">
+        {% if level == "success" %}
+        <span class="error-icon success">✓</span>
+        <h3>{{t!(self.ctx, "common.t.success")}}</h3>
+        {% elif level == "info" %}
+        <span class="error-icon info">ℹ</span>
+        <h3>{{t!(self.ctx, "common.t.info")}}</h3>
+        {% else %}
+        <span class="error-icon danger">⚠</span>
+        <h3>{{t!(self.ctx, "common.t.error")}}</h3>
+        {% endif %}
+    </div>
+
+    <div class="inner">
+        <div class="error-content">
+            <p class="error-text">{{ message }}</p>
+
+            {% if let Some(return_url) = return_url %}
+            <div class="error-actions">
+                <a href="{{ return_url }}" class="btn btn-primary"> {{t!(self.ctx, "common.t.return")}} </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

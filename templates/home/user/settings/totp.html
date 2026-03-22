@@ -1,0 +1,65 @@
+{% extends "../../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a href="/user/center">{{t!(self.ctx,
+                    "user.t.settings_crumb")}}</a> &rsaquo; {{t!(self.ctx, "user.t.totp_crumb")}}
+            </div>
+            <div class="inner">
+                {% if !tips.is_empty() %}
+                <div class="problem">{{ tips }}</div>
+                {% endif %}
+
+                {% if is_bound %}
+                <div class="message success">
+                    {{t!(self.ctx, "user.t.totp_enabled_msg")}}
+                </div>
+                <div class="sep20"></div>
+                <div>
+                    <p>{{t!(self.ctx, "user.t.totp_disable_help")}}</p>
+                    <form action="/user/settings/totp" method="post" class="form">
+                        <input type="hidden" name="action" value="unbind">
+                        <div class="form-row">
+                            <label>{{t!(self.ctx, "user.t.verification_code_label")}}</label>
+                            <input type="text" name="code" autocomplete="off" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="super normal button">{{t!(self.ctx,
+                                "user.t.totp_disable_button")}}</button>
+                        </div>
+                    </form>
+                </div>
+                {% else %}
+                <div>
+                    <h3>{{t!(self.ctx, "user.t.totp_enable_title")}}</h3>
+                    <p>{{t!(self.ctx, "user.t.totp_scan_help")}}</p>
+                    <div style="text-align: center; margin: 20px 0;">
+                        <img src="data:image/png;base64,{{ qr_code.as_ref().unwrap() }}" style="max-width: 200px;" />
+                    </div>
+                    <p>{{t!(self.ctx, "user.t.totp_manual_key_help")}} <code>{{ secret.as_ref().unwrap() }}</code></p>
+                    <div class="sep20"></div>
+                    <p>{{t!(self.ctx, "user.t.totp_enter_code_help")}}</p>
+                    <form action="/user/settings/totp" method="post" class="form">
+                        <input type="hidden" name="action" value="bind">
+                        <input type="hidden" name="secret" value="{{ secret.as_ref().unwrap() }}">
+                        <div class="form-row">
+                            <label>{{t!(self.ctx, "user.t.verification_code_label")}}</label>
+                            <input type="text" name="code" autocomplete="off" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="super normal button">{{t!(self.ctx,
+                                "user.t.totp_enable_button")}}</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

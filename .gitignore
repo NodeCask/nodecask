@@ -1,0 +1,9 @@
+/target
+/.idea/
+/data/
+/public/admin-web/
+/public.zip
+locales/en_US.toml
+locales/zh_CN.toml
+public/style.css
+public/style.css.map

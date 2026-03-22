@@ -1,0 +1,43 @@
+{% extends "../../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a href="/user/center">{{t!(self.ctx,
+                    "user.t.settings_crumb")}}</a>
+                &rsaquo; {{t!(self.ctx, "user.t.change_avatar_crumb")}}
+            </div>
+            <div class="inner">
+                {% if !tips.is_empty() %}
+                <div class="problem">{{ tips }}</div>
+                {% endif %}
+
+                <form action="/user/settings/avatar" method="post" enctype="multipart/form-data" class="form">
+                    <div class="form-row">
+                        <label>{{t!(self.ctx, "user.t.current_avatar")}}</label>
+                        <img src="/u/{{ username }}/avatar.png?t={{timestamp}}" alt="Current Avatar"
+                            style="width: 73px; height: 73px; border-radius: 4px;">
+                    </div>
+
+                    <div class="form-row">
+                        <label for="avatar">{{t!(self.ctx, "user.t.select_image")}}</label>
+                        <div style="flex: 1; max-width: 400px;">
+                            <input type="file" id="avatar" name="avatar" accept="image/png, image/jpeg" required
+                                style="width: 100%;">
+                            <div class="help-text">{{t!(self.ctx, "user.t.avatar_help_text")}}</div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="super normal button">{{t!(self.ctx, "user.t.upload_button")}}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

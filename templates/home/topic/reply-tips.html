@@ -1,0 +1,6 @@
+{% if locale == "zh_CN" %}
+<a href="/u/{{user.username}}">{{user.username}}</a> 回复了
+您发布的帖子《<a href="/t/{{article.id}}">{{article.title}}</a>》
+{% else %}
+<a href="/u/{{user.username}}">{{user.username}}</a> replied to the topic you posted 《<a href="/t/{{article.id}}">{{article.title}}</a>》
+{% endif %}

@@ -1,0 +1,73 @@
+{% extends "../home/layout.html" %}
+{% block content %}
+<div class="box error-message">
+    <div class="cell error-header info">
+        <span class="error-icon info">ℹ</span>
+        <h3>{{t!(self.ctx, "common.t.redirect_title")}}</h3>
+    </div>
+
+    <div class="inner">
+        <div class="error-content">
+            {% if !tips.is_empty() %}
+            <p class="error-text">{{ tips }}</p>
+            {% else %}
+            <p class="error-text">{{t!(self.ctx, "common.t.redirecting_msg")}}</p>
+            {% endif %}
+
+            <div class="error-actions" style="flex-direction: column; gap: 8px">
+                <div class="countdown" aria-live="polite">
+                    2 {{t!(self.ctx, "common.t.redirect_countdown_suffix")}}
+                </div>
+
+                <div style="margin-top: 8px">
+                    <a id="redirect_now" href="{{ url }}" class="btn btn-primary">{{t!(self.ctx,
+                        "common.t.redirect_now")}}</a>
+                    <a href="javascript:history.back()" class="btn btn-secondary"
+                        style="margin-left: 8px">{{t!(self.ctx, "common.t.return_prev")}}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="redirect_url" style="display: none">{{ url }}</div>
+
+<script>
+    (function () {
+        const urlEl = document.getElementById("redirect_url");
+        if (!urlEl) return;
+        const url = (urlEl.textContent || "").trim();
+        if (!url) return;
+
+        const countdownEl = document.querySelector(".countdown");
+        const countdownSuffix = '{{t!(self.ctx, "common.t.redirect_countdown_suffix")}}';
+        let seconds = 2;
+
+        function render() {
+            if (countdownEl) {
+                countdownEl.textContent = seconds + countdownSuffix;
+            }
+        }
+
+        render();
+
+        const timer = setInterval(function () {
+            seconds -= 1;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                window.location.href = url;
+            } else {
+                render();
+            }
+        }, 1000);
+
+        // If user clicks the immediate link, normal navigation will occur.
+        const nowBtn = document.getElementById("redirect_now");
+        if (nowBtn) {
+            nowBtn.addEventListener("click", function () {
+                clearInterval(timer);
+            });
+        }
+    })();
+</script>
+{% endblock %}

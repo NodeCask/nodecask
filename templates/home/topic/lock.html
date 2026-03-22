@@ -1,0 +1,40 @@
+{% extends "../layout.html" %}
+{% block content %}{% let topic = &topic %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a
+                    href="/t/{{ topic.id }}">{{ topic.title }}</a> <span class="chevron">&nbsp;›&nbsp;</span> {% if topic.is_locked %}{{t!(self.ctx, "topic.t.unlock_topic")}}{% else %}{{t!(self.ctx, "topic.t.lock_topic")}}{% endif %}
+            </div>
+            <div class="inner">
+                <div class="msg">
+                    {% if topic.is_locked %}
+                        {{t!(self.ctx, "topic.t.confirm_unlock_msg", title=topic.title)}}
+                    {% else %}
+                        {{t!(self.ctx, "topic.t.confirm_lock_msg", title=topic.title)}}
+                    {% endif %}
+                    {% if !topic.is_locked %}
+                    <div class="sep10"></div>
+                    <span class="fade">{{t!(self.ctx, "topic.t.lock_warning")}}</span>
+                    {% endif %}
+                </div>
+
+                <div class="sep20"></div>
+
+                <form action="/t/{{ topic.id }}/lock" method="POST">
+                    <input type="hidden" name="token" value="{{ token }}">
+                    <div class="form-actions">
+                        <button type="submit" class="button super normal">{% if topic.is_locked %}{{t!(self.ctx, "topic.t.confirm_unlock")}}{% else %}{{t!(self.ctx, "topic.t.confirm_lock")}}{%
+                            endif %}</button>
+                        &nbsp; <a href="/t/{{ topic.id }}" class="button gray">{{t!(self.ctx, "topic.t.cancel")}}</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "../modules/sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "../layout.html" %}
+{% block content %}
+{% if !node.custom_html.is_empty() %}{{node.custom_html|safe}}{% endif %}
+{% if !node.background_image.is_empty() %}
+<style>
+    body{
+        background-image: url("{{node.background_image}}");
+    }
+</style>
+{% endif %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a
+                    href="/go/{{ node.slug }}">{{ node.name }}</a> <span class="chevron">&nbsp;›&nbsp;</span> {{t!(self.ctx, "topic.t.create_new_topic")}}
+            </div>
+            <div class="inner">
+                <form action="/go/{{ node.slug }}/new" method="POST" class="form form-topic">
+                    <input type="hidden" name="token" value="{{ token }}">
+
+                    <div class="form-row">
+                        <label for="title">{{t!(self.ctx, "topic.t.title")}}</label>
+                        <input type="text" id="title" name="title" value="{{ title }}" required placeholder="{{t!(self.ctx, "topic.t.enter_title_placeholder")}}"
+                            class="input-text" autofocus>
+                    </div>
+
+                    <div class="form-row">
+                        <label for="topic-content">{{t!(self.ctx, "topic.t.content")}}</label>
+                        <textarea id="topic-content" name="content" rows="20" required placeholder="{{t!(self.ctx, "topic.t.enter_content_placeholder")}}"
+                            class="input-text">{{ content }}</textarea>
+                    </div>
+                    {% for s in tips %}
+                    <div class="problem">{{ s }}</div>
+                    {% endfor %}
+
+                    {% if let Some(turnstile) = turnstile %}
+                    <div class="form-row">
+                        <label></label>
+                        {% include "../../common/turnstile.html" %}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-actions">
+                        <button type="submit" class="button primary">{{t!(self.ctx, "topic.t.publish_topic")}}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "../modules/sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

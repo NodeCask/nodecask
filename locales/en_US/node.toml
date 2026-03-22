@@ -1,0 +1,7 @@
+not_found = "Node not found"
+moderator_only = "This node is accessible to moderators only"
+member_only = "This node is accessible to members only, please log in"
+fetch_topics_error = "failed to fetch topics"
+list = "Node List"
+choose_post = "Choose Node to Post"
+statistics = "Website Statistics"

@@ -1,0 +1,48 @@
+{% extends "../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a
+                    href="/u/{{ username }}">{{ username }}</a> <span class="chevron">&nbsp;›&nbsp;</span> {{t!(self.ctx, "user.t.recent_replies")}}
+            </div>
+
+            {% if comments.data.is_empty() %}
+            <div class="inner">
+                <span class="fade">{{t!(self.ctx, "user.t.no_replies")}}</span>
+            </div>
+            {% else %}
+            <ul class="topics">
+                {% for comment in comments.data %}
+                <li style="padding: 10px; border-bottom: 1px solid #e2e2e2;">
+                    <div class="item-content">
+                        <div class="item-meta">
+                            {{t!(self.ctx, "user.t.replied_to")}} <a
+                                href="/u/{{ comment.article_author_username }}"><strong>{{ comment.article_author_username }}</strong></a>
+                            {{t!(self.ctx, "user.t.created_topic")}} <span class="chevron">&nbsp;›&nbsp;</span>
+                            <a href="/t/{{ comment.article_id }}#reply{{ comment.floor }}"><strong>{{
+                                    comment.article_title }}</strong></a>
+                            <span class="fade" style="float: right;">{{ ctx.t(comment.created_at) }}</span>
+                        </div>
+                        <div class="reply_content">
+                            {{ comment.render()|safe }}
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if comments.total_page > 1 %}
+            <div class="cell">
+                {{ comments.render()|safe }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "../modules/sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

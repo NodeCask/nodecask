@@ -1,0 +1,38 @@
+<div class="box" id="userCenterLinks">
+    <div class="cell">
+        <span class="fade">{{t!(self.ctx, "user.t.settings_sidebar_title")}}</span>
+    </div>
+    <div class="cell">
+        <a href="/user/settings/profile">{{t!(self.ctx, "user.t.sidebar_profile")}}</a>
+    </div>
+    <div class="cell">
+        <a href="/user/email/change">{{t!(self.ctx, "user.t.sidebar_email")}}</a>
+    </div>
+    <div class="cell">
+        <a href="/user/settings/password">{{t!(self.ctx, "user.t.sidebar_password")}}</a>
+    </div>
+    <div class="cell">
+        <a href="/user/settings/totp">{{t!(self.ctx, "user.t.sidebar_totp")}}</a>
+    </div>
+    <div class="cell">
+        <a href="/user/settings/avatar">{{t!(self.ctx, "user.t.sidebar_avatar")}}</a>
+    </div>
+    <div class="cell">
+        <a href="/user/center">{{t!(self.ctx, "user.t.sidebar_back_center")}}</a>
+    </div>
+</div>
+<style>
+    #userCenterLinks a.tab_current {
+        color: var(--accent);
+    }
+</style>
+<script>
+    (function () {
+        const current = location.pathname;
+        document.querySelectorAll("#userCenterLinks a").forEach((link) => {
+            if (link.getAttribute("href") === current) {
+                link.classList.add("tab_current");
+            }
+        })
+    })();
+</script>

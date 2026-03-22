@@ -1,0 +1,70 @@
+{% extends "../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>{{t!(self.ctx, "user.t.my_notifications")}}</span>
+                {% if !notifications.is_empty() %}
+                <form action="/notifications/clear" method="post" style="margin:0;">
+                    <button type="submit" class="button"
+                        onclick='return confirm(`{{t!(self.ctx, "user.t.confirm_clear_all")}}`);'>{{t!(self.ctx,
+                        "user.t.clear_all")}}</button>
+                </form>
+                {% endif %}
+            </div>
+            {% if notifications.is_empty() %}
+            <div class="inner text-center">
+                <span style="color: var(--text-tertiary);">{{t!(self.ctx, "user.t.no_notifications")}}</span>
+            </div>
+            {% else %}
+            {% for notification in notifications.data %}
+            <div class="cell item">
+                <div style="display: flex; align-items: start;">
+                    <div style="margin-right: 10px;">
+                        <div class="notification-icon">
+                            {% match notification.category.as_str() %}
+                            {% when "reply" %}
+                            <span style="color: var(--text-info);">💬</span>
+                            {% when "like" %}
+                            <span style="color: var(--text-success);">❤️</span>
+                            {% when "delete" %}
+                            <span style="color: var(--text-danger);">🗑️</span>
+                            {% else %}
+                            {% endmatch %}
+                            <span style="color: var(--text-tertiary);">🔔</span>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="notification-content">
+                            {{ notification.content|safe }}
+                        </div>
+                        <div class="sep5"></div>
+                        <span class="small fade">
+                            {{ ctx.t(notification.created_at) }}
+                            <span style="display: none">{{t!(self.ctx,
+                                "user.t.notification_category")}}{{notification.category}}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="box">
+            <div class="inner">
+                {{ notifications.render()|safe }}
+            </div>
+        </div>
+
+        <div class="box">
+            <div class="cell">
+                <div class="inner" style="text-align: center;">
+                    <a href="/" class="button">{{t!(self.ctx, "user.t.back_to_home")}}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

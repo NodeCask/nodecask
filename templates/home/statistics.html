@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div id="Main">
+    <div id="Content" class="full-width">
+
+        <div class="box">
+            <div class="cell">
+                <div class="header">
+                    <a href="/">{{t!(self.ctx, "home.home")}}</a>
+                    <span class="chevron">&nbsp;›&nbsp;</span>
+                    {{t!(self.ctx, "topic.recent_topics")}}
+                </div>
+            </div>
+            {% for article in articles %}
+            <div class="cell item">
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tbody>
+                    <tr>
+                        <td width="auto" valign="middle">
+                            <span class="item_title"><a href="/t/{{ article.id }}">{{ article.title }}</a></span>
+                            <div class="sep5"></div>
+                            <span class="topic_info">
+                            <div class="votes"></div>
+                            <a class="node" href="/go/{{ article.node_slug }}">{{ article.node_name }}</a>
+                            &nbsp;•&nbsp;
+                            <strong><a href="/u/{{ article.username }}">{{ article.username }}</a></strong>
+                            &nbsp;•&nbsp;
+                            <span>{{ ctx.t_ago(article.created_at) }}</span>
+                            {% if let Some(last_reply_by) = article.last_reply_by %}
+                            &nbsp;•&nbsp;
+                            {{t!(self.ctx, "topic.t.last_reply_from")}}
+                                <strong><a href="/u/{{ last_reply_by }}">{{ last_reply_by }}</a></strong>
+                            {% endif %}
+                        </span>
+                        </td>
+                        <td width="50" align="right" valign="middle">
+                            {% if article.reply_count > 0 %}
+                            <a href="/t/{{ article.id }}" class="count_livid">{{ article.reply_count }}</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+    <div id="Sidebar">
+
+        <div class="box">
+            <div class="header"><span class="chevron">&nbsp;›&nbsp;</span> {{t!(self.ctx, "node.statistics")}} </div>
+            <div class="cell">
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tbody>
+                    <tr>
+                        <td width="auto" align="left"><span class="gray">{{t!(self.ctx, "node.t.total_members")}}</span></td>
+                        <td width="auto" align="right"><strong>{{ user_count }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td width="auto" align="left"><span class="gray">{{t!(self.ctx, "node.t.total_topics")}}</span></td>
+                        <td width="auto" align="right"><strong>{{ topic_count }}</strong></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

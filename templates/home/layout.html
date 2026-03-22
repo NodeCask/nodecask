@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{{ctx.title}} - {{ctx.website.name}}{% endblock %}</title>
+    {% if !ctx.website.description.is_empty() %}<meta name="description" content="{{ctx.website.description}}" />{% endif %}
+    {% if !ctx.website.keyword.is_empty() %}<meta name="keywords" content="{{ctx.website.keyword}}">{% endif %}
+    <link rel="stylesheet" href="/public/style.css?t={{crate::build::BUILD_TIMESTAMP}}" />
+    {% block head %}{% endblock %}
+    {% if !ctx.injection.style_compiled.is_empty() %}
+    <style>{{ ctx.injection.style_compiled|safe }}</style>
+    {% endif %}
+    {{ ctx.injection.html_head|safe }}
+</head>
+
+<body class="{{ctx.theme}}">
+    <div id="Curtain">
+        <div class="container">
+            <div class="logo">
+                <a href="/" alt="{{ctx.website.name}}">
+                    <img src="{{ctx.website.logo}}" />
+                    {{ctx.website.name}}
+                </a>
+            </div>
+            <ul class="navigation">
+                <li><a href="/nodes">{{t!(self.ctx, "home.t.nodes")}}</a></li>
+                <li><a href="/search">{{t!(self.ctx, "home.t.search")}}</a></li>
+                {% if let Some(u) = ctx.current_user %}
+                <li><a href="/user/center">{{ u.username }}</a></li>
+                <li><a href="/notifications">{{t!(self.ctx, "home.t.notifications")}}{% if u.unread_notifications > 0 %}({{u.unread_notifications}}){% endif %}</a></li>
+                {% if u.is_moderator %}
+                <li><a href="/public/admin-web/index.html" target="_blank">{{t!(self.ctx, "home.t.admin_panel")}}</a></li>
+                {% endif %}
+                <li><a href="/logout">{{t!(self.ctx, "home.t.logout")}}</a></li>
+                {% else %}
+                <li><a href="/login">{{t!(self.ctx, "home.t.login")}}</a></li>
+                <li><a href="/register">{{t!(self.ctx, "home.t.register")}}</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+    <div id="Wrapper">
+        {% block content %}{% endblock %}
+    </div>
+
+    <div id="Bottom">
+        {% if ctx.links.len() > 0 %}
+        <div class="bottom-links">
+            <div class="container links-grid">
+                {% for c in ctx.links %}
+                <div class="link-group">
+                    <div class="group-title">{{c.title}}</div>
+                    <ul class="link-list">
+                        {% for link in c.links %}
+                        <li>
+                            {% if link.blank %}
+                            <a href="{{link.url}}" target="_blank" rel="noopener noreferrer"
+                                title="{{link.description}}">
+                                {{link.title}}
+                                <svg class="external-icon" width="12" height="12" viewBox="0 0 12 12" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M10.5 1.5L4.5 7.5M10.5 1.5H6.75M10.5 1.5V5.25" stroke="currentColor"
+                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </a>
+                            {% else %}
+                            <a href="{{link.url}}" title="{{link.description}}">{{link.title}}</a>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="bottom-copyright">
+            <div class="container">
+                {% if !ctx.website.copyright.is_empty() %}
+                <span class="copyright-text">{{ctx.website.copyright}}</span> -
+                {% endif %}
+                <span class="gray">Powered by <a href="https://github.com/NodeCask" target="_blank">NodeCask</a></span>
+                {% if &ctx.theme == "theme-light" %}
+                - <span class="gray"><a href="/select-theme?theme=dark">{{t!(self.ctx, "home.t.dark_mode")}}</a></span>
+                {% else %}
+                - <span class="gray"><a href="/select-theme?theme=light">{{t!(self.ctx, "home.t.light_mode")}}</a></span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {{ ctx.injection.html_body|safe }}
+</body>
+
+</html>

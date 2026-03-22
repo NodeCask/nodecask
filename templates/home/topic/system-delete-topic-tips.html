@@ -1,0 +1,11 @@
+<div>
+{% if locale == "zh_CN" %}
+    <p>您发布的帖子《<a href="/t/{{topic.id}}">{{topic.title}}</a>》被系统删除。</p>
+    <p>原因：</p>
+    <p>{{reason}}</p>
+{% else %}
+    <p>The topic you posted 《<a href="/t/{{topic.id}}">{{topic.title}}</a>》 was deleted by the system.</p>
+    <p>Reason:</p>
+    <p>{{reason}}</p>
+{% endif %}
+</div>

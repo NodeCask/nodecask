@@ -1,0 +1,33 @@
+:root {
+  // Base HSL values for easier derivation
+  --base-hue: 210;
+  --base-sat: 10%;
+
+  // Semantic Colors - Light Theme
+  --bg-body: #f0f2f5;
+  --bg-card: #ffffff;
+  --bg-header: #ffffff;
+  --bg-input: #ffffff;
+  
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  
+  --border-color: #e1e4e8;
+  --divider-color: #eeeeee;
+
+  --link-color: #778087;
+  --link-hover: #4d5256;
+
+  // Primary Action Color
+  --primary: #333333;
+  --primary-hover: #555555;
+
+  // Secondary/Accent
+  --accent: #f9683a; 
+  
+  // Layout
+  --gap: 20px;
+  --gap-mobile: 10px;
+  --radius: 4px;
+}

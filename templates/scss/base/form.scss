@@ -1,0 +1,128 @@
+.form {
+  padding: 10px 0;
+
+  .form-row {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+
+    label {
+      width: 80px;
+      text-align: right;
+      margin-right: 20px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: block;
+      margin-top: 6px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="file"],
+    textarea,
+    select {
+      flex: 1;
+      max-width: 400px;
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+      background-color: var(--bg-card);
+      color: var(--text-primary);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+
+      &:focus {
+        border-color: #888;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+      }
+
+      &:disabled {
+        background-color: rgba(0, 0, 0, 0.05);
+        cursor: not-allowed;
+      }
+    }
+
+    input[type="checkbox"] {
+      margin-right: 10px;
+    }
+
+    textarea {
+      line-height: 1.5;
+      resize: vertical;
+      font-family: monospace;
+    }
+
+    .help-text {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+  }
+
+  .problem {
+    margin-left: 100px;
+    padding: 10px;
+    background-color: #fff6f6;
+    border: 1px solid #e0b4b4;
+    color: #9f3a38;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    max-width: 400px;
+  }
+
+  .form-actions {
+    margin-top: 10px;
+    margin-left: 100px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+}
+@media (max-width: 600px) {
+  .form{
+    .form-row{
+      flex-direction: column;
+      align-items: stretch;
+      label{
+        width: 100%;
+        text-align: left;
+      }
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="file"],
+      textarea,
+      select {
+        max-width: unset;
+      }
+    }
+    .form-actions{
+      margin-top: unset;
+      margin-left: unset;
+
+    }
+  }
+}
+
+.form.form-topic {
+  .form-row {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="file"],
+    textarea {
+      max-width: 100%;
+    }
+  }
+
+  .problem {
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,49 @@
+{% extends "../../layout.html" %}
+{% block content %}{% let topic = &topic %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a
+                    href="/t/{{ topic.id }}">{{ topic.title }}</a> <span class="chevron">&nbsp;›&nbsp;</span> {{t!(self.ctx, "topic.t.move_topic")}}
+            </div>
+            <div class="inner">
+                <div class="msg">
+                    {{t!(self.ctx, "topic.t.move_topic_to", title=topic.title)}}
+                </div>
+
+                <div class="sep20"></div>
+
+                <form action="/super/t/{{ topic.id }}/move" method="POST">
+                    <input type="hidden" name="token" value="{{ token }}">
+                    
+                    <div class="nodes-list" style="max-height: 400px; overflow-y: auto;">
+                    {% for node in nodes %}
+                        <div style="margin-bottom: 5px;">
+                            <label>
+                                {% if node.id == topic.node_id %}
+                                <input type="radio" name="node_slug" value="{{ node.slug }}" checked>
+                                {% else %}
+                                <input type="radio" name="node_slug" value="{{ node.slug }}">
+                                {% endif %}
+                                {{ node.name }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                    </div>
+
+                    <div class="sep20"></div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="button super normal">{{t!(self.ctx, "topic.t.confirm_move")}}</button>
+                        &nbsp; <a href="/t/{{ topic.id }}" class="button gray">{{t!(self.ctx, "topic.t.cancel")}}</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "../../modules/sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

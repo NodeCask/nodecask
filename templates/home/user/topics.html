@@ -1,0 +1,62 @@
+{% extends "../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a
+                    href="/u/{{ username }}">{{ username }}</a> <span class="chevron">&nbsp;›&nbsp;</span>
+                {{t!(self.ctx, "user.t.all_topics")}}
+            </div>
+
+            {% if articles.data.is_empty() %}
+            <div class="inner">
+                <span class="fade">{{t!(self.ctx, "user.t.no_topics_found")}}</span>
+            </div>
+            {% else %}
+            <ul class="topics">
+                {% for article in articles.data %}
+                <li class="{% if article.is_pinned %}pinned{% endif %}">
+                    <div class="item-content">
+                        <div class="item-title">
+                            {% if article.is_pinned %}<span class="badge-pinned">{{t!(self.ctx, "user.t.pinned")}}</span>{%
+                            endif %}
+                            <a href="/t/{{ article.id }}">{{ article.title }}</a>
+                        </div>
+                        <div class="item-meta">
+                            <a href="/go/{{ article.node_slug }}" class="node">{{ article.node_name }}</a> •
+                            <a href="/u/{{ article.username }}" class="author"><strong>{{ article.username
+                                    }}</strong></a>
+                            {% if article.reply_count > 0 %}
+                            •&nbsp; {{ctx.t_ago(article.updated_at) }}
+                            {% if let Some(last_reply_by) = &article.last_reply_by %}
+                            •&nbsp; {{t!(self.ctx, "user.t.last_reply_from")}} <a
+                                href="/u/{{ last_reply_by }}"><strong>{{ last_reply_by }}</strong></a>
+                            {% endif %}
+                            {% else %}
+                            •&nbsp; {{ctx.t_ago(article.created_at) }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="item-count">
+                        {% if article.reply_count > 0 %}
+                        <a href="/t/{{ article.id }}" class="count-livid">{{ article.reply_count }}</a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if articles.total_page > 1 %}
+            <div class="cell">
+                {{ articles.render()|safe }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "../modules/sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

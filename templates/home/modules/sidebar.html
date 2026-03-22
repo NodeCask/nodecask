@@ -1,0 +1,57 @@
+{% if let Some(u) = ctx.current_user %}
+<div class="box">
+    <div class="cell">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+            <tbody>
+                <tr>
+                    <td width="48" valign="top">
+                        <a href="/user/center"><img src="/u/{{u.username}}/avatar.png?t={{u.avatar_timestamp}}" class="avatar"
+                                style="width: 48px; height: 48px; border-radius: 4px;"></a>
+                    </td>
+                    <td width="10" valign="top"></td>
+                    <td width="auto" align="left">
+                        <div class="sep5"></div>
+                        <span class="bigger"><a href="/user/center"
+                                style="color: var(--text-primary); text-decoration: none;">{{ u.username }}</a></span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="inner">
+        <a href="/nodes-new" class="button primary"
+            style="width: 100%; display: block; box-sizing: border-box; text-align: center;">{{t!(self.ctx,
+            "home.t.create_new_topic")}}</a>
+    </div>
+</div>
+{% else %}
+<div class="box">
+    <div class="cell">
+        <strong>Tiny BBS</strong>
+        <div class="sep5"></div>
+        <span class="fade">{{t!(self.ctx, "home.t.simple_forum")}}</span>
+    </div>
+    <div class="inner">
+        <div class="sep5"></div>
+        <div style="text-align: center;">
+            <a href="/register" class="button"
+                style="display: block; width: 100%; box-sizing: border-box;">{{t!(self.ctx, "home.t.register_now")}}</a>
+            <div class="sep10"></div>
+            <div class="sep5"></div>
+            {{t!(self.ctx, "home.t.already_registered")}}<a href="/login"
+                style="color: var(--text-secondary);">{{t!(self.ctx, "home.t.login")}}</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="sep20"></div>
+
+{% if !ctx.website.about.is_empty() %}
+<div class="box">
+    <div class="cell"><span class="fade">{{t!(self.ctx, "home.t.about_us")}}</span></div>
+    <div class="inner">
+        <p style="margin: 0; color: var(--text-secondary); font-size: 14px;">{{ctx.website.about}}</p>
+    </div>
+</div>
+{% endif %}

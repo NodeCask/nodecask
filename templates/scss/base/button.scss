@@ -1,0 +1,47 @@
+.button, button, input[type="submit"] {
+  display: inline-block;
+  padding: 5px 10px;
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 3px;
+  cursor: pointer;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: var(--divider-color);
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+
+  &.primary {
+    background-color: var(--text-primary);
+    color: #fff;
+    border-color: var(--text-primary);
+
+    &:hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+      color: #fff;
+    }
+  }
+
+  &.small {
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+}
+
+// 底部按钮往右边浮动
+.right {
+  text-align: right;
+}
+
+.two {
+  display: flex;
+  justify-content: space-between;
+}

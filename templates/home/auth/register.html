@@ -1,0 +1,127 @@
+{% extends "../layout.html" %} {% block content %}
+<div id="Main">
+    <div id="Content" class="full-width auth-page">
+        <div class="box auth-box">
+            <div class="cell" style="text-align: center; font-weight: bold">
+                {{t!(self.ctx, "auth.t.register")}}
+            </div>
+            <div class="inner">
+                <!-- 这里不需要填写 action 用来防止 query 字符串掉落 -->
+                <form method="POST" class="form">
+                    <input type="hidden" name="token" value="{{token}}" />
+                    <div class="form-row">
+                        <label for="email"
+                            >{{t!(self.ctx, "auth.t.email")}}</label
+                        >
+                        {% if register_config.email_verify %}
+                        <input type="text" value="{{ email }}" disabled />
+                        <input type="hidden" name="email" value="{{ email }}" />
+                        {% else %}
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            autocomplete="off"
+                            value="{{ email }}"
+                            required
+                        />
+                        {% endif %}
+                    </div>
+                    <div class="form-row">
+                        <label for="username"
+                            >{{t!(self.ctx, "auth.t.username")}}</label
+                        >
+                        <input
+                            type="text"
+                            id="username"
+                            value="{{ username }}"
+                            autocomplete="off"
+                            name="username"
+                            required
+                            minlength="3"
+                        />
+                    </div>
+                    <div class="form-row" style="margin-top: -10px">
+                        <label></label>
+                        <span
+                            style="font-size: 12px; color: var(--text-tertiary)"
+                            >{{t!(self.ctx,
+                            "auth.t.use_halfwidth_chars")}}</span
+                        >
+                    </div>
+                    <div class="form-row">
+                        <label for="password"
+                            >{{t!(self.ctx, "auth.t.password")}}</label
+                        >
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            value="{{ password }}"
+                            required
+                            minlength="6"
+                        />
+                    </div>
+
+                    {% if register_config.invite_code_required %}
+                    <div class="form-row">
+                        <label for="invite_code"
+                            >{{t!(self.ctx, "auth.t.invite_code")}}</label
+                        >
+                        <input
+                            type="text"
+                            id="invite_code"
+                            name="invite_code"
+                            value="{{ invite_code }}"
+                            required
+                        />
+                    </div>
+                    {% endif %} {% if !register_config.terms.is_empty() %}
+                    <div class="form-row">
+                        <label
+                            >{{t!(self.ctx,
+                            "auth.t.terms_of_registration")}}</label
+                        >
+                        <div
+                            style="
+                                max-height: 150px;
+                                overflow-y: auto;
+                                background: var(--bg-secondary);
+                                padding: 10px;
+                                border: 1px solid var(--border-primary);
+                                font-size: 13px;
+                                margin-top: 5px;
+                                color: var(--text-secondary);
+                            "
+                        >
+                            {{ register_config.terms|safe }}
+                        </div>
+                    </div>
+                    {% if let Some(turnstile) = turnstile %}
+                    <div class="form-row">
+                        <label></label>
+                        {% include "../../common/turnstile.html" %}
+                    </div>
+                    {% endif %}
+                    {% endif %} {% if !tips.is_empty() %}
+                    <div class="problem">{{ tips }}</div>
+                    {% endif %}
+
+                    <div class="form-actions" style="">
+                        <button type="submit" class="button primary">
+                            {{t!(self.ctx, "auth.t.register")}}
+                        </button>
+                    </div>
+                </form>
+                <div class="sep20"></div>
+                <div style="text-align: center; font-size: 14px">
+                    {{t!(self.ctx, "auth.t.already_have_account")}}<a
+                        href="/login"
+                        >{{t!(self.ctx, "auth.t.login_now")}}</a
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

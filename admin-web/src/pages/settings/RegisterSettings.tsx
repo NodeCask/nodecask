@@ -1,0 +1,244 @@
+import React, { useEffect, useReducer, useState } from "react";
+import { Box, Button, Card, Checkbox, Flex, Heading, Separator, Spinner, Text, TextArea, TextField, } from "@radix-ui/themes";
+import { pull, push, SysError } from "../../api";
+import { initialSpinnerState, spinnerReducer } from "../../hooks";
+
+export interface RegisterConfig {
+    enable: boolean;
+    email_verify: boolean;
+    invite_code_required: boolean;
+    min_username: number;
+    max_username: number;
+    min_password_len: number;
+    terms: string;
+    initial_score: number;
+    initial_avatar: string;
+}
+
+const load = () => pull<RegisterConfig>(`/settings?name=register_config`);
+const save = (value: RegisterConfig) => push(`/settings`, { name: "register_config", value });
+
+export const RegisterSettings: React.FC = () => {
+    const [spinner, dispatch] = useReducer(spinnerReducer, initialSpinnerState);
+    const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+    const [form, setForm] = useState<RegisterConfig>({
+        enable: false,
+        email_verify: false,
+        invite_code_required: false,
+        min_username: 3,
+        max_username: 20,
+        min_password_len: 6,
+        terms: "",
+        initial_score: 100,
+        initial_avatar: "",
+    });
+
+    useEffect(() => {
+        load()
+            .then(v => v && setForm(v))
+            .finally(() => dispatch({ type: "STOP_LOADING" }));
+    }, []);
+
+    if (spinner.loading) {
+        return (
+            <Card>
+                <Flex align="center" justify="center" py="9">
+                    <Spinner size="3" />
+                </Flex>
+            </Card>
+        );
+    }
+
+    const handleSave = async () => {
+        dispatch({ type: "START_SAVING" });
+        try {
+            await save(form);
+            setMessage({ text: "注册设置保存成功", type: "success" });
+        } catch (err) {
+            const errorMessage =
+                err instanceof SysError ? err.message : "保存注册设置失败";
+            setMessage({ text: errorMessage, type: "error" });
+        } finally {
+            dispatch({ type: "STOP_SAVING" });
+            setTimeout(() => setMessage(null), 3000);
+        }
+    };
+
+    return (
+        <Card>
+            <Flex direction="column" gap="4">
+                <Box>
+                    <Heading as="h3" size="4" mb="3">
+                        用户注册设置
+                    </Heading>
+                    <Flex direction="column" gap="3">
+                        <Box>
+                            <Flex align="center" gap="2">
+                                <Checkbox
+                                    checked={form.enable}
+                                    onCheckedChange={(checked) =>
+                                        setForm({ ...form, enable: checked === true })
+                                    }
+                                />
+                                <Text size="2" weight="medium">
+                                    开启用户注册
+                                </Text>
+                            </Flex>
+                        </Box>
+                        <Box>
+                            <Flex align="center" gap="2">
+                                <Checkbox
+                                    checked={form.email_verify}
+                                    onCheckedChange={(checked) =>
+                                        setForm({ ...form, email_verify: checked === true })
+                                    }
+                                />
+                                <Text size="2" weight="medium">
+                                    开启邮箱验证
+                                </Text>
+                            </Flex>
+                        </Box>
+                        <Box>
+                            <Flex align="center" gap="2">
+                                <Checkbox
+                                    checked={form.invite_code_required}
+                                    onCheckedChange={(checked) =>
+                                        setForm({ ...form, invite_code_required: checked === true })
+                                    }
+                                />
+                                <Text size="2" weight="medium">
+                                    注册需要邀请码
+                                </Text>
+                            </Flex>
+                        </Box>
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                最短密码长度
+                            </Text>
+                            <TextField.Root
+                                type="number"
+                                value={String(form.min_password_len)}
+                                onChange={(e) =>
+                                    setForm({ ...form, min_password_len: Number(e.target.value) })
+                                }
+                                placeholder="6"
+                            />
+                        </Box>
+
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                最小用户名长度
+                            </Text>
+                            <TextField.Root
+                                type="number"
+                                value={String(form.min_username)}
+                                onChange={(e) =>
+                                    setForm({ ...form, min_username: Number(e.target.value) })
+                                }
+                                placeholder="3"
+                            />
+                        </Box>
+
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                最大用户名长度
+                            </Text>
+                            <TextField.Root
+                                type="number"
+                                value={String(form.max_username)}
+                                onChange={(e) =>
+                                    setForm({ ...form, max_username: Number(e.target.value) })
+                                }
+                                placeholder="20"
+                            />
+                        </Box>
+
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                初始信誉分数
+                            </Text>
+                            <TextField.Root
+                                type="number"
+                                value={String(form.initial_score)}
+                                onChange={(e) =>
+                                    setForm({ ...form, initial_score: Number(e.target.value) })
+                                }
+                                placeholder="100"
+                            />
+                        </Box>
+
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                默认头像
+                            </Text>
+                            <Box mb="2">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setForm({
+                                                    ...form,
+                                                    initial_avatar: reader.result as string,
+                                                });
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                />
+                            </Box>
+                            {form.initial_avatar && (
+                                <Flex direction="column" gap="2" align="start">
+                                    <img
+                                        src={form.initial_avatar}
+                                        alt="Avatar Preview"
+                                        style={{
+                                            maxWidth: "100px",
+                                            maxHeight: "100px",
+                                            borderRadius: "4px",
+                                        }}
+                                        onError={(e) => (e.currentTarget.style.display = "none")}
+                                    />
+                                    <Button
+                                        variant="soft"
+                                        color="red"
+                                        size="1"
+                                        onClick={() => setForm({ ...form, initial_avatar: "" })}
+                                    >
+                                        清除图片
+                                    </Button>
+                                </Flex>
+                            )}
+                        </Box>
+
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                注册条款 (HTML)
+                            </Text>
+                            <TextArea
+                                value={form.terms}
+                                onChange={(e) => setForm({ ...form, terms: e.target.value })}
+                                placeholder="输入注册条款内容，支持 HTML"
+                                rows={10}
+                            />
+                        </Box>
+                    </Flex>
+                </Box>
+
+                <Separator size="4" />
+
+                <Flex justify="end" align="center" gap="3">
+                    {message && (
+                        <Text size="2" color={message.type === "success" ? "green" : "red"}>
+                            {message.text}
+                        </Text>
+                    )}
+                    <Button onClick={handleSave} loading={spinner.saving} disabled={spinner.saving}>保存注册设置</Button>
+                </Flex>
+            </Flex>
+        </Card>
+    );
+};

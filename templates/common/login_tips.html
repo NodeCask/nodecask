@@ -1,0 +1,28 @@
+{% extends "../home/layout.html" %}
+{% block content %}
+<div class="box error-message">
+    <div class="cell error-header danger">
+        <span class="error-icon danger">⚠</span>
+        <h3>{{t!(self.ctx, "common.t.login_required_title")}}</h3>
+    </div>
+
+    <div class="inner">
+        <div class="error-content">
+            <p class="error-text">{{t!(self.ctx, "common.t.login_required_msg")}}</p>
+
+            <div class="sep20"></div>
+
+            <div class="error-actions">
+                <a href="/login" class="btn btn-primary">{{t!(self.ctx, "common.t.login_now")}}</a>
+                <a href="/register" class="btn btn-secondary">{{t!(self.ctx, "common.t.register_now")}}</a>
+            </div>
+
+            <div class="sep10"></div>
+
+            <p class="error-text">
+                {{t!(self.ctx, "common.t.login_desc")}}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

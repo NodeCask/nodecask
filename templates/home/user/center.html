@@ -1,0 +1,117 @@
+{% extends "../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> {{t!(self.ctx, "user.t.center_title")}}
+            </div>
+            <div class="inner">
+                <div class="welcome-section">
+                    <strong>{{t!(self.ctx, "user.t.welcome_back")}}{{ user.username }}!</strong>
+                    <div class="sep10"></div>
+                    <span style="color: var(--text-tertiary);">{{t!(self.ctx, "user.t.center_intro")}}</span>
+                </div>
+            </div>
+        </div>
+        <div class="sep20"></div>
+        <div class="box">
+            <div class="cell">
+                {{t!(self.ctx, "user.t.my_topics")}}
+            </div>
+            {% if topics.is_empty() %}
+            <div class="inner text-center">
+                <span style="color: var(--text-tertiary);">{{t!(self.ctx, "user.t.no_topics")}}</span>
+            </div>
+            {% else %}
+            {% for t in topics %}
+            <div class="cell item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        {% if t.is_pinned %}<span class="badge-pinned">{{t!(self.ctx, "user.t.pinned")}}</span>{% endif %}
+                        <a href="/t/{{ t.id }}">{{ t.title }}</a>
+                        <div class="sep5"></div>
+                        <span class="small fade">
+                            <a class="node" href="/go/{{ t.node_slug }}">{{ t.node_name }}</a> &bull;
+                            {{ ctx.t(t.created_at) }} &bull;
+                            {{ t.view_count }} {{t!(self.ctx, "user.t.clicks")}}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="inner" style="text-align: right;">
+                <a href="/u/{{ user.username }}/topics">{{t!(self.ctx, "user.t.view_all_topics")}}</a>
+                <span class="fade">&nbsp; | &nbsp;</span>
+                <a href="/u/{{ user.username }}/comments">{{t!(self.ctx, "user.t.view_all_comments")}}</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="Sidebar">
+        <div class="box">
+            <div class="cell">
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tbody>
+                        <tr>
+                            <td width="48" valign="top">
+                                <a href="/u/{{ user.username }}"><img src="/u/{{ user.username }}/avatar.png?t={{user.avatar_timestamp}}"
+                                        class="avatar" border="0" align="default"
+                                        style="width: 48px; height: 48px; border-radius: 4px;"></a>
+                            </td>
+                            <td width="10" valign="top"></td>
+                            <td width="auto" align="left">
+                                <div class="fr">
+                                </div>
+                                <span class="bigger"><a href="/u/{{ user.username }}">{{ user.username }}</a></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="sep10"></div>
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tbody>
+                        <tr>
+                            <td>{{t!(self.ctx, "user.t.email_label")}}{{ user.email }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{t!(self.ctx, "user.t.joined_at_label")}}{{ ctx.date(user.created_at) }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{t!(self.ctx, "user.t.balance_label")}}{{ user.coins }} {{t!(self.ctx, "user.t.coins")}}</td>
+                        </tr>
+                        <tr>
+                            <td>{{t!(self.ctx, "user.t.topics_label")}}{{ user.topics }} {{t!(self.ctx,
+                                "user.t.replies_label")}}{{ user.replies }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="cell">
+                {% if !checked_in_today %}
+                <form action="/user/checkin" method="post">
+                    <button type="submit" class="button primary" style="width: 100%;">{{t!(self.ctx,
+                        "user.t.checkin_daily")}}</button>
+                </form>
+                {% else %}
+                <button type="button" class="button" style="width: 100%; cursor: default; opacity: 0.6;"
+                    disabled>{{t!(self.ctx, "user.t.checkin_done")}}</button>
+                {% endif %}
+            </div>
+            <div class="cell">
+                <a href="/user/settings/profile">{{t!(self.ctx, "user.t.settings_profile")}}</a>
+            </div>
+            <div class="cell">
+                <a href="/user/email/change">{{t!(self.ctx, "user.t.settings_email")}}</a>
+            </div>
+            <div class="cell">
+                <a href="/user/settings/password">{{t!(self.ctx, "user.t.settings_password")}}</a>
+            </div>
+            <div class="cell">
+                <a href="/user/settings/avatar">{{t!(self.ctx, "user.t.settings_avatar")}}</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

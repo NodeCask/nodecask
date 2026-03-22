@@ -1,0 +1,48 @@
+{% extends "../layout.html" %} {% block head %}{% endblock %} {% block content
+%}
+<div id="Main">
+    <div id="Content" class="full-width auth-page">
+        <div class="box auth-box">
+            <div class="cell" style="text-align: center; font-weight: bold">
+                {{t!(self.ctx, "auth.t.two_factor_auth")}}
+            </div>
+            <div class="inner">
+                <form action="/login-totp-challenge" method="POST" class="form">
+                    <input type="hidden" name="token" value="{{ token }}" />
+                    <input
+                        type="hidden"
+                        name="username"
+                        value="{{ username }}"
+                    />
+                    {% if let Some(r) = remember_me %}
+                    <input type="hidden" name="remember_me" value="{{ r }}" />
+                    {% endif %}
+
+                    <div class="form-row">
+                        <label for="code"
+                            >{{t!(self.ctx, "auth.t.verification_code")}}</label
+                        >
+                        <input
+                            type="text"
+                            id="code"
+                            name="code"
+                            autocomplete="off"
+                            autofocus
+                            required
+                        />
+                    </div>
+
+                    {% if !tips.is_empty() %}
+                    <div class="problem">{{ tips }}</div>
+                    {% endif %}
+                    <div class="form-actions" style="">
+                        <button type="submit" class="button primary">
+                            {{t!(self.ctx, "auth.t.verify")}}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

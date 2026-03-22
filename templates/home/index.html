@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell"
+                style="padding: 10px; background-color: var(--bg-card); border-bottom: 1px solid var(--divider-color);">
+                <span style="color: var(--text-tertiary);">{{t!(self.ctx, "home.t.all_topics")}}</span>
+            </div>
+            <div class="cell">
+                <ul class="topics">
+                    {% for t in topics %}
+                    <li class="{% if t.is_pinned %}pinned{% endif %}">
+                        <div class="item-avatar">
+                            <a href="/u/{{t.username}}">
+                                <img src="/u/{{t.username}}/avatar.png?t={{ t.avatar_timestamp }}" class="avatar" />
+                            </a>
+                        </div>
+                        <div class="item-content">
+                            <div class="item-title">
+                                {% if t.is_pinned %}<span class="badge-pinned">{{t!(self.ctx, "home.t.pinned")}}</span>{% endif %}
+                                <a href="/t/{{t.id}}">{{t.title}}</a>
+                            </div>
+                            <div class="item-meta">
+                                <a href="/go/{{ t.node_slug }}" class="node">{{ t.node_name }}</a> •
+                                <a href="/u/{{t.username}}" class="author"><strong>{{t.username}}</strong></a> •
+                                <span>{{ ctx.t(t.created_at) }}</span>
+                            </div>
+                        </div>
+                        <div class="item-count">
+                            <a href="/t/{{t.id}}#reply" class="count-livid">{{ t.reply_count }}</a>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="empty">
+                        <div class="hint">{{t!(self.ctx, "home.t.no_data")}}</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="inner" style="text-align: center;">
+                <a href="/recent" style="color: var(--text-secondary);">{{t!(self.ctx, "home.t.view_more")}}</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="Sidebar">
+        {% include "modules/sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

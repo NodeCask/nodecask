@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <div class="two">
+                    <div>
+                        <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span>
+                        {{t!(self.ctx, "home.t.search")}}
+                    </div>
+                </div>
+            </div>
+            <div class="cell">
+                <div class="search-container">
+                    <form action="/search" method="get" class="search-form">
+                        <input type="text" name="q" value="{{q}}" placeholder='{{t!(self.ctx, "home.t.search_placeholder")}}' autofocus />
+                        <button type="submit" class="button primary">{{t!(self.ctx, "home.t.search")}}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {% if !q.is_empty() %}
+        <div class="sep20"></div>
+        <div class="box">
+            <div class="cell">
+                <span class="gray">{{t!(self.ctx, "home.t.search_results_for", q=self.q)}}</span>
+            </div>
+            <ul class="topics">
+                {% for t in topics %}
+                <li>
+                    <div class="item-avatar">
+                        <a href="/u/{{t.username}}">
+                            <img src="/u/{{t.username}}/avatar.png" class="avatar" />
+                        </a>
+                    </div>
+                    <div class="item-content">
+                        <div class="item-title">
+                            <a href="/t/{{t.id}}">{{t.title}}</a>
+                        </div>
+                        {% if !t.content.is_empty() %}
+                        <div class="search-result-snippet">
+                            {{ t.content }}
+                        </div>
+                        {% endif %}
+                        <div class="item-meta">
+                            <a href="/go/{{ t.node_slug }}" class="node">{{ t.node }}</a> •
+                            <a href="/u/{{t.username}}" class="author"><strong>{{t.username}}</strong></a> •
+                            <span>{{ ctx.t(t.date) }}</span>
+                        </div>
+                    </div>
+                </li>
+                {% else %}
+                <li class="empty">
+                    <div class="hint">{{t!(self.ctx, "home.t.no_results")}}</div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* 全局布局样式 */
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 确保内容区域填满可用空间 */
+main {
+  flex: 1;
+}
+
+/* 移除默认按钮样式以使用 Radix UI 主题 */
+button {
+  all: unset;
+}
+
+/* 确保链接在暗色模式下可见 */
+a {
+  color: inherit;
+  text-decoration: none;
+}

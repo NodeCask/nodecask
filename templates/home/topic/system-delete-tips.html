@@ -1,0 +1,13 @@
+<div>
+{% if locale == "zh_CN" %}
+    <p>您发布的评论被系统删除。内容：</p>
+    <p style="max-height: 100px">{{content}}</p>
+    <p>原因：</p>
+    <p>{{reason}}</p>
+{% else %}
+    <p>Your comment was deleted by the system. Content:</p>
+    <p style="max-height: 100px">{{content}}</p>
+    <p>Reason:</p>
+    <p>{{reason}}</p>
+{% endif %}
+</div>

@@ -1,0 +1,7 @@
+{% if locale == "zh_CN" %}
+您发布的帖子《<a href="/t/{{article.id}}">{{article.title}}</a>》
+已被管理员（<a href="/u/{{user.username}}">{{user.username}}</a>）移动到
+<a href="/go/{{node.slug}}">{{node.name}}</a> 节点。
+{% else %}
+The topic you posted 《<a href="/t/{{article.id}}">{{article.title}}</a>》 has been moved by moderator (<a href="/u/{{user.username}}">{{user.username}}</a>) to node <a href="/go/{{node.slug}}">{{node.name}}</a>.
+{% endif %}

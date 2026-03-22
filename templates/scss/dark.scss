@@ -1,0 +1,213 @@
+// Dark Theme
+// Activated by adding .theme-dark class to body element
+
+body.theme-dark {
+  // Override CSS Variables for Dark Mode
+  --bg-body: #1a1b1e;
+  --bg-card: #25262b;
+  --bg-header: #1e1f23;
+  --bg-input: #2c2d32;
+
+  --text-primary: #e1e3e5;
+  --text-secondary: #a6a7ab;
+  --text-tertiary: #6b6d73;
+
+  --border-color: #3a3b3f;
+  --divider-color: #333438;
+
+  --link-color: #8c9199;
+  --link-hover: #c1c2c5;
+
+  // Primary Action Color
+  --primary: #5c5f66;
+  --primary-hover: #7a7d85;
+
+  // Accent stays vibrant in dark mode
+  --accent: #ff7b4d;
+
+  // Additional dark theme specific overrides
+  color-scheme: dark;
+
+  // Scrollbar styling for dark mode
+  scrollbar-color: #4a4b4f #1a1b1e;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #1a1b1e;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #4a4b4f;
+    border-radius: 5px;
+
+    &:hover {
+      background: #5a5b5f;
+    }
+  }
+
+  // Override specific component styles that need more than variable changes
+
+  // Box shadows need adjustment for dark mode
+  .box {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  // Input fields
+  input[type="text"],
+  input[type="password"],
+  input[type="email"],
+  input[type="url"],
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select {
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    &:focus {
+      border-color: var(--link-hover);
+      box-shadow: 0 0 0 2px rgba(140, 145, 153, 0.2);
+    }
+  }
+
+  // Buttons
+  button,
+  .button,
+  input[type="submit"] {
+    background-color: var(--primary);
+    color: var(--text-primary);
+
+    &:hover {
+      background-color: var(--primary-hover);
+    }
+
+    &.primary {
+      background-color: #4a9eff;
+      color: #ffffff;
+
+      &:hover {
+        background-color: #3d8ae6;
+      }
+    }
+  }
+
+  // Reply count badge
+  .count-livid {
+    background-color: #3a3b3f;
+    color: var(--text-primary);
+  }
+
+  // Problem/Error messages
+  .problem {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: #ff6b6b;
+    border-color: rgba(220, 53, 69, 0.3);
+  }
+
+  // Success states
+  .error-header.success {
+    .error-icon {
+      color: #51cf66;
+    }
+  }
+
+  // Info states
+  .error-header.info {
+    .error-icon {
+      color: #339af0;
+    }
+  }
+
+  // Danger states
+  .error-header.danger {
+    .error-icon {
+      color: #ff6b6b;
+    }
+  }
+
+  // Avatar placeholder backgrounds
+  .avatar {
+    border-color: var(--border-color);
+  }
+
+  // Node and author tags
+  .topics .item-meta .node {
+    background-color: rgba(100, 108, 120, 0.2);
+    color: var(--text-secondary);
+
+    &:hover {
+      background-color: rgba(100, 108, 120, 0.3);
+    }
+  }
+
+  // Badge styles
+  .badge-pinned {
+    background-color: rgba(255, 123, 77, 0.15);
+    color: var(--accent);
+  }
+
+  .badge-op {
+    background-color: rgba(74, 158, 255, 0.15);
+    color: #4a9eff;
+  }
+
+  // Floor number in comments
+  .floor {
+    color: var(--text-tertiary);
+  }
+
+  // Code blocks
+  code,
+  pre {
+    background-color: #2c2d32;
+    color: #e1e3e5;
+    border-color: var(--border-color);
+  }
+
+  // Blockquotes
+  blockquote {
+    border-left-color: var(--border-color);
+    color: var(--text-secondary);
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  // Selection
+  ::selection {
+    background-color: rgba(74, 158, 255, 0.3);
+    color: #ffffff;
+  }
+
+  // Links
+  a {
+    color: var(--link-color);
+
+    &:hover {
+      color: var(--link-hover);
+    }
+  }
+
+  // Image placeholder
+  img {
+    opacity: 0.95;
+  }
+
+  // Nodes Grid
+  .nodes-grid li a {
+    background-color: var(--bg-input);
+    color: var(--text-secondary);
+
+    &:hover {
+      background-color: var(--primary);
+      color: var(--text-primary);
+    }
+  }
+  }

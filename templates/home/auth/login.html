@@ -1,0 +1,81 @@
+{% extends "../layout.html" %}
+{% block head %}{% endblock %}
+{% block content %}
+<div id="Main">
+    <div id="Content" class="full-width auth-page">
+        <div class="box auth-box">
+            <div class="cell" style="text-align: center; font-weight: bold">
+                {{t!(self.ctx, "auth.t.login")}}
+            </div>
+            <div class="inner">
+                <form action="/login" method="POST" class="form">
+                    <input type="hidden" name="token" value="{{token}}" />
+                    <div class="form-row">
+                        <label for="username"
+                            >{{t!(self.ctx, "auth.t.username")}}</label
+                        >
+                        <input
+                            type="text"
+                            id="username"
+                            value="{{ username }}"
+                            name="username"
+                            required
+                        />
+                    </div>
+                    <div class="form-row">
+                        <label for="password"
+                            >{{t!(self.ctx, "auth.t.password")}}</label
+                        >
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            value="{{ password }}"
+                            required
+                        />
+                    </div>
+                    {% if let Some(turnstile) = turnstile %}
+                    <div class="form-row">
+                        <label></label>
+                        {% include "../../common/turnstile.html" %}
+                    </div>
+                    {% endif %}
+                    <div class="form-row">
+                        <label></label>
+                        <div>
+                            <input
+                                type="checkbox"
+                                name="remember_me"
+                                value="true"
+                                id="remember_me"
+                            />
+                            <label
+                                for="remember_me"
+                                style="display: inline; font-weight: normal"
+                                >{{t!(self.ctx, "auth.t.remember_me")}}</label
+                            >
+                        </div>
+                    </div>
+                    {% if !tips.is_empty() %}
+                    <div class="problem">{{ tips }}</div>
+                    {% endif %}
+                    <div class="form-actions" style="">
+                        <button type="submit" class="button primary">
+                            {{t!(self.ctx, "auth.t.login_button")}}
+                        </button>
+                    </div>
+                </form>
+                <div class="sep20"></div>
+                <div style="text-align: center; font-size: 14px">
+                    <a href="/forgot-password"
+                        >{{t!(self.ctx, "auth.t.forgot_password")}}</a
+                    >
+                    - {{t!(self.ctx, "auth.t.no_account")}}<a href="/register"
+                        >{{t!(self.ctx, "auth.t.register_now")}}</a
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

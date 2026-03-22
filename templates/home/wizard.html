@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安装向导</title>
+    <link rel="stylesheet" href="/public/style.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .wizard-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        .wizard-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .wizard-header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        .form-control:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        .section-title {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            margin-top: 2rem;
+            color: #333;
+            font-size: 1.25rem;
+        }
+        summary.section-title {
+            cursor: pointer;
+            outline: none;
+            display: block;
+        }
+        summary.section-title::-webkit-details-marker {
+            display: none;
+        }
+        summary.section-title::before {
+            content: '▶';
+            display: inline-block;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+        details[open] summary.section-title::before {
+            transform: rotate(90deg);
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1.1rem;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            background-color: #fce4e4;
+            color: #cc0000;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="wizard-container">
+        <div class="wizard-header">
+            <h1>安装向导</h1>
+            <p>请配置您的论坛基本信息</p>
+        </div>
+
+        {% if !tips.is_empty() %}
+        <div class="error-message" style="display: block; {% if success %}background-color: #d4edda; color: #155724;{% endif %}">
+            {{ tips }}
+        </div>
+        {% endif %}
+
+        {% if success %}
+        <div style="text-align: center; padding: 2rem;">
+            <h2>🎉 安装成功！</h2>
+            <p>系统正在重启，请稍候...</p>
+            <a href="/" class="btn-primary" style="display: inline-block; width: auto; text-decoration: none; margin-top: 1rem;">前往首页</a>
+        </div>
+        {% else %}
+        <form action="/" method="post">
+            <div class="section-title">网站基本信息</div>
+            <div class="form-group">
+                <label class="form-label" for="site_name">网站名称</label>
+                <input type="text" class="form-control" id="site_name" name="site_name" value="{{ site_name }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="site_domain">网站域名 (例如: http://localhost:3000)</label>
+                <input type="url" class="form-control" id="site_domain" name="site_domain" placeholder="http://localhost:3000" value="{{ site_domain }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="site_desc">网站描述</label>
+                <textarea class="form-control" id="site_desc" name="site_desc" rows="3">{{ site_desc }}</textarea>
+            </div>
+
+            <div class="section-title">管理员账户</div>
+            <div class="form-group">
+                <label class="form-label" for="admin_username">用户名</label>
+                <input type="text" class="form-control" id="admin_username" name="admin_username" value="{{ admin_username }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="admin_password">密码</label>
+                <input type="password" class="form-control" id="admin_password" name="admin_password" value="{{ admin_password }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="admin_email">邮箱</label>
+                <input type="email" class="form-control" id="admin_email" name="admin_email" value="{{ admin_email }}" required>
+            </div>
+
+            <details>
+                <summary class="section-title">SMTP 配置 (用于发送邮件)</summary>
+                <div class="form-group">
+                    <label class="form-label" for="smtp_host">SMTP 主机</label>
+                    <input type="text" class="form-control" id="smtp_host" name="smtp_host" placeholder="smtp.example.com" value="{{ smtp_host }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="smtp_port">SMTP 端口</label>
+                    <input type="number" class="form-control" id="smtp_port" name="smtp_port" value="{{ smtp_port }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="smtp_user">SMTP 用户名</label>
+                    <input type="text" class="form-control" id="smtp_user" name="smtp_user" value="{{ smtp_user }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="smtp_pass">SMTP 密码</label>
+                    <input type="password" class="form-control" id="smtp_pass" name="smtp_pass" value="{{ smtp_pass }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="smtp_from_name">发件人名称</label>
+                    <input type="text" class="form-control" id="smtp_from_name" name="smtp_from_name" value="{{ smtp_from_name }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="smtp_from_email">发件人邮箱</label>
+                    <input type="email" class="form-control" id="smtp_from_email" name="smtp_from_email" value="{{ smtp_from_email }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" name="smtp_tls" value="true" {% if smtp_tls %}checked{% endif %}> 使用 TLS (Implicit)
+                    </label>
+                </div>
+            </details>
+
+            <button type="submit" class="btn-primary" style="margin-top: 2rem;">开始安装</button>
+        </form>
+        {% endif %}
+    </div>
+</body>
+</html>

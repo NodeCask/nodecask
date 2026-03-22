@@ -1,0 +1,13 @@
+{% if locale == "zh_CN" %}
+{% if reply %}
+用户 <a href="/u/{{username}}">{{username}}</a> 在帖子《<a href="/t/{{topic.id}}#reply{{floor}}">{{topic.title}}</a>》 回复中提到了您。
+{% else %}
+用户 <a href="/u/{{username}}">{{username}}</a> 在帖子《<a href="/t/{{topic.id}}#reply{{floor}}">{{topic.title}}</a>》 内容中提到了您。
+{% endif %}
+{% else %}
+{% if reply %}
+User <a href="/u/{{username}}">{{username}}</a> mentioned you in a reply to topic 《<a href="/t/{{topic.id}}#reply{{floor}}">{{topic.title}}</a>》.
+{% else %}
+User <a href="/u/{{username}}">{{username}}</a> mentioned you in the content of topic 《<a href="/t/{{topic.id}}#reply{{floor}}">{{topic.title}}</a>》.
+{% endif %}
+{% endif %}

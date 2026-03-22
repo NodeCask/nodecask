@@ -1,0 +1,56 @@
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  list-style: none;
+  padding: 0;
+  margin: var(--gap) 0;
+  gap: 5px;
+
+  li {
+    display: flex;
+    align-items: center;
+
+    a {
+      display: inline-block;
+      padding: 4px 10px;
+      text-decoration: none;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      color: var(--text-secondary);
+      font-size: 14px;
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        background-color: var(--bg-body);
+        color: var(--text-primary);
+        border-color: var(--link-hover);
+      }
+    }
+
+    &.active a {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+
+      &:hover {
+        background-color: var(--primary-hover);
+      }
+    }
+
+    // For the ".." span which is just text in li
+    &:not(.active):not(:has(a)) {
+      padding: 4px 10px;
+      color: var(--text-tertiary);
+      font-size: 14px;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .pagination {
+    justify-content: center;
+    margin: var(--gap-mobile) 0;
+  }
+}
+

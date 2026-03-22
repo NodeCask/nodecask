@@ -1,0 +1,33 @@
+{% extends "../../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a href="/user/center">{{t!(self.ctx,
+                    "user.t.settings_crumb")}}</a>
+                &rsaquo; {{t!(self.ctx, "user.t.change_email_crumb")}}
+            </div>
+            <div class="inner">
+                {% if !tips.is_empty() %}
+                <div class="problem">{{ tips }}</div>
+                {% endif %}
+                <form action="/user/email/change" method="POST" class="form">
+                    <div class="form-row">
+                        <label for="new_email">{{t!(self.ctx, "user.t.new_email_label")}}</label>
+                        <input type="email" id="new_email" name="new_email" value="{{ email }}" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="super normal button">{{t!(self.ctx,
+                            "user.t.send_code_button")}}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

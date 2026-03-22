@@ -1,0 +1,130 @@
+{% extends "../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                {{t!(self.ctx, "user.t.recent_activity")}}
+            </div>
+            {% if topics.is_empty() %}
+            <div class="inner text-center">
+                <span style="color: var(--text-tertiary);">{{t!(self.ctx, "user.t.no_topics")}}</span>
+            </div>
+            {% else %}
+            {% for t in topics %}
+            <div class="cell item">
+                <div style="display: flex; align-items: start;">
+                    <div style="margin-right: 10px;">
+                        <a href="/u/{{ t.username }}">
+                            <img src="/u/{{ t.username }}/avatar.png?t={{t.avatar_timestamp}}" class="avatar"
+                                style="width: 48px; height: 48px; border-radius: 4px;" />
+                        </a>
+                    </div>
+                    <div style="flex: 1;">
+                        <span class="item_title">
+                            <a href="/t/{{ t.id }}">{{ t.title }}</a>
+                        </span>
+                        <div class="sep5"></div>
+                        <span class="small fade">
+                            <a class="node" href="/go/{{ t.node_slug }}">{{ t.node_name }}</a> &bull;
+                            <strong><a href="/u/{{ t.username }}">{{ t.username }}</a></strong> &bull;
+                            {{ ctx.t(t.created_at) }}
+                        </span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="count_livid">{{ t.view_count }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            <div class="inner" style="text-align: right;">
+                <a href="/u/{{ profile_user.username }}/topics">{{t!(self.ctx, "user.t.view_all_topics")}}</a>
+                <span class="fade">&nbsp; | &nbsp;</span>
+                <a href="/u/{{ profile_user.username }}/comments">{{t!(self.ctx, "user.t.view_all_comments")}}</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="Sidebar">
+        <div class="box">
+            <div class="cell">
+                <div style="display: flex; align-items: center;">
+                    <img src="/u/{{ profile_user.username }}/avatar.png?t={{profile_user.avatar_timestamp}}" class="avatar"
+                        style="width: 73px; height: 73px; border-radius: 4px; margin-right: 10px;" />
+                    <div>
+                        <h1 style="font-size: 20px; margin: 0;">{{ profile_user.username }}</h1>
+                        <span class="fade">{{ profile_user.role }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="cell">
+                <span class="fade">{{t!(self.ctx, "user.t.joined_at")}}</span><br />
+                <strong>
+                    {{ctx.date(profile_user.created_at)}}
+                </strong>
+            </div>
+            <div class="cell">
+                <span class="fade">{{t!(self.ctx, "user.t.last_visited")}}</span><br />
+                <strong>
+                    {{profile_user.last_access_date.to_string()}}
+                </strong>
+            </div>
+            {% if !profile_user.bio.is_empty() %}
+            <div class="cell">
+                <span class="fade">{{t!(self.ctx, "user.t.bio")}}</span><br />
+                {{ profile_user.bio }}
+            </div>
+            {% endif %}
+            {% if !profile_user.address.is_empty() %}
+            <div class="cell">
+                <span class="fade">{{t!(self.ctx, "user.t.address")}}</span><br />
+                {{ profile_user.address }}
+            </div>
+            {% endif %}
+            {% if profile_user.public_email %}
+            <div class="cell">
+                <span class="fade">{{t!(self.ctx, "user.t.email")}}</span><br />
+                <a href="mailto:{{ profile_user.email }}">{{ profile_user.email }}</a>
+            </div>
+            {% endif %}
+            {% if !is_self %}
+            <div class="inner">
+                {% match relation %}
+                {% when Some with (r) %}
+                {% if r == "follow" %}
+                <form action="/u/{{ profile_user.username }}/unfollow" method="post" style="display:inline;">
+                    <button type="submit" class="button">{{t!(self.ctx, "user.t.unfollow")}}</button>
+                </form>
+                <div class="sep10"></div>
+                <form action="/u/{{ profile_user.username }}/block" method="post" style="display:inline;">
+                    <button type="submit" class="button danger">{{t!(self.ctx, "user.t.block_user")}}</button>
+                </form>
+                {% else if r == "block" %}
+                <form action="/u/{{ profile_user.username }}/unblock" method="post" style="display:inline;">
+                    <button type="submit" class="button">{{t!(self.ctx, "user.t.unblock")}}</button>
+                </form>
+                {% else %}
+                <form action="/u/{{ profile_user.username }}/follow" method="post" style="display:inline;">
+                    <button type="submit" class="button contrast">{{t!(self.ctx, "user.t.follow")}}</button>
+                </form>
+                <div class="sep10"></div>
+                <form action="/u/{{ profile_user.username }}/block" method="post" style="display:inline;">
+                    <button type="submit" class="button danger">{{t!(self.ctx, "user.t.block")}}</button>
+                </form>
+                {% endif %}
+                {% when None %}
+                <form action="/u/{{ profile_user.username }}/follow" method="post" style="display:inline;">
+                    <button type="submit" class="button contrast">{{t!(self.ctx, "user.t.follow")}}</button>
+                </form>
+                <div class="sep10"></div>
+                <form action="/u/{{ profile_user.username }}/block" method="post" style="display:inline;">
+                    <button type="submit" class="button danger">{{t!(self.ctx, "user.t.block")}}</button>
+                </form>
+                {% endmatch %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

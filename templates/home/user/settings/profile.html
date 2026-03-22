@@ -1,0 +1,95 @@
+{% extends "../../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> <a href="/user/center">{{t!(self.ctx, "user.t.settings_crumb")}}</a> &rsaquo; {{t!(self.ctx, "user.t.preferences_crumb")}}
+            </div>
+            <div class="inner">
+                {% if !tips.is_empty() %}
+                <div class="problem">{{ tips }}</div>
+                {% endif %}
+                <form action="/user/settings/profile" method="post" class="form">
+                    <div class="form-row">
+                        <label>{{t!(self.ctx, "user.t.bio_label")}}</label>
+                        <textarea name="bio" rows="3">{{ user.bio }}</textarea>
+                    </div>
+                    <div class="form-row">
+                        <label>{{t!(self.ctx, "user.t.address_label")}}</label>
+                        <input type="text" name="address" value="{{ user.address }}">
+                    </div>
+                    <div class="form-row">
+                        <label>{{t!(self.ctx, "user.t.timezone_label")}}</label>
+                        <select name="timezone">
+                            <option value="UTC">UTC</option>
+                            <option value="Africa/Cairo">(GMT+02:00) Cairo</option>
+                            <option value="Africa/Johannesburg">(GMT+02:00) Johannesburg</option>
+                            <option value="Africa/Lagos">(GMT+01:00) Lagos</option>
+                            <option value="America/Anchorage">(GMT-09:00) Alaska</option>
+                            <option value="America/Argentina/Buenos_Aires">(GMT-03:00) Buenos Aires</option>
+                            <option value="America/Chicago">(GMT-06:00) Central Time (US & Canada)</option>
+                            <option value="America/Denver">(GMT-07:00) Mountain Time (US & Canada)</option>
+                            <option value="America/Los_Angeles">(GMT-08:00) Pacific Time (US & Canada)</option>
+                            <option value="America/Mexico_City">(GMT-06:00) Mexico City</option>
+                            <option value="America/New_York">(GMT-05:00) Eastern Time (US & Canada)</option>
+                            <option value="America/Sao_Paulo">(GMT-03:00) Sao Paulo</option>
+                            <option value="Asia/Bangkok">(GMT+07:00) Bangkok</option>
+                            <option value="Asia/Dubai">(GMT+04:00) Dubai</option>
+                            <option value="Asia/Hong_Kong">(GMT+08:00) Hong Kong</option>
+                            <option value="Asia/Istanbul">(GMT+03:00) Istanbul</option>
+                            <option value="Asia/Jakarta">(GMT+07:00) Jakarta</option>
+                            <option value="Asia/Kolkata">(GMT+05:30) Kolkata</option>
+                            <option value="Asia/Seoul">(GMT+09:00) Seoul</option>
+                            <option value="Asia/Shanghai">(GMT+08:00) Shanghai / Beijing</option>
+                            <option value="Asia/Singapore">(GMT+08:00) Singapore</option>
+                            <option value="Asia/Tokyo">(GMT+09:00) Tokyo</option>
+                            <option value="Australia/Sydney">(GMT+11:00) Sydney</option>
+                            <option value="Europe/Berlin">(GMT+01:00) Berlin</option>
+                            <option value="Europe/London">(GMT+00:00) London</option>
+                            <option value="Europe/Moscow">(GMT+03:00) Moscow</option>
+                            <option value="Europe/Paris">(GMT+01:00) Paris</option>
+                            <option value="Pacific/Auckland">(GMT+13:00) Auckland</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>{{t!(self.ctx, "user.t.language_label")}}</label>
+                        <select name="language">
+                            <option value="zh_CN">{{t!(self.ctx, "user.t.lang_zh_cn")}}</option>
+                            <option value="en_US">{{t!(self.ctx, "user.t.lang_en_us")}}</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>{{t!(self.ctx, "user.t.public_email_label")}}</label>
+                        <div style="display: flex; align-items: center;">
+                            <input type="checkbox" name="public_email" {% if user.public_email %}checked{% endif %}>
+                            <span class="fade">{{t!(self.ctx, "user.t.public_email_help")}}</span>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="super normal button">{{t!(self.ctx,
+                            "user.t.save_settings_button")}}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "sidebar.html" %}
+    </div>
+</div>
+<script>
+    (function () {
+        var timezoneSelect = document.querySelector('select[name="timezone"]');
+        var languageSelect = document.querySelector('select[name="language"]');
+
+        if (timezoneSelect) {
+            timezoneSelect.value = "{{ user.timezone }}";
+        }
+
+        if (languageSelect) {
+            languageSelect.value = "{{ user.language }}";
+        }
+    })();
+</script>
+{% endblock %}

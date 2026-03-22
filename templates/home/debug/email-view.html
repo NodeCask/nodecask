@@ -1,0 +1,34 @@
+{% extends "home/layout.html" %}
+
+{% block content %}
+<div id="Content">
+    <div class="box">
+        <div class="cell"><a href="/debug/emails">Email List</a> &rsaquo; Email #{{ email.id }}</div>
+        <div class="inner">
+            <dl>
+                <dt><strong>Created At:</strong></dt>
+                <dd>{{ ctx.t(email.created_at) }}</dd>
+                <br>
+                <dt><strong>User ID:</strong></dt>
+                <dd>{{ email.user_id }}</dd>
+                <br>
+                <dt><strong>From:</strong></dt>
+                <dd>{{ email.email_from }}</dd>
+                <br>
+                <dt><strong>To:</strong></dt>
+                <dd>{{ email.email_to }}</dd>
+                <br>
+                <dt><strong>Subject:</strong></dt>
+                <dd>{{ email.email_subject }}</dd>
+                <br>
+                <dt><strong>Result:</strong></dt>
+                <dd>{{ email.result }}</dd>
+            </dl>
+        </div>
+        <div class="cell"><strong>Body:</strong></div>
+        <div class="inner" style="background: #fff; border: 1px solid #ccc; padding: 10px; margin: 10px;">
+            {{ email.email_body|safe }}
+        </div>
+    </div>
+</div>
+{% endblock %}

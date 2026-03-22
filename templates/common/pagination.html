@@ -1,0 +1,11 @@
+<ul class="pagination">
+    {% for btn in buttons %}
+    {% if let crate::store::PageButton::Current(p) = btn %}
+    <li class="active"><a href="?p={{p}}">{{p}}</a></li>
+    {% else if let crate::store::PageButton::Link(p) = btn %}
+    <li><a href="?p={{p}}">{{p}}</a></li>
+    {% else if let crate::store::PageButton::Span = btn %}
+    <li>..</li>
+    {% endif %}
+    {% endfor %}
+</ul>

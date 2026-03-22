@@ -1,0 +1,187 @@
+{% extends "../layout.html" %}
+{% block head %}
+    <meta property="og:title" content="{{topic.title}}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{topic.title}}">
+    {% if !node.background_image.is_empty() %}
+    <style>
+        body {
+            background-image: url("{{node.background_image}}");
+        }
+    </style>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if !node.custom_html.is_empty() %}{{node.custom_html|safe}}{% endif %}
+<div id="Main">
+    <div id="Content">
+        <div class="box" style="border-bottom: none;">
+            <!-- Article Header -->
+            <div class="topic-header">
+                <div style="float: right;">
+                    <a href="/u/{{ topic.username }}"><img src="/u/{{ topic.username }}/avatar.png?t={{ topic.avatar_timestamp }}" class="avatar-large"></a>
+                </div>
+                <h1>{{ topic.title }}</h1>
+                <div class="topic-meta">
+                    <a href="/go/{{ topic.node_slug }}" class="node">{{ topic.node_name }}</a> •
+                    <a href="/u/{{ topic.username }}" class="author"><strong>{{ topic.username }}</strong></a> •
+                    <span>{{ ctx.t(topic.created_at) }}</span> •
+                    <span>{{ topic.view_count }} {{t!(self.ctx, "topic.t.views")}}</span>
+
+                    {% if topic.op("edit") %}
+                    • <a href="/t/{{ topic.id }}/edit">{{t!(self.ctx, "topic.t.edit")}}</a>
+                    {% endif %}
+                    {% if topic.op("lock") %}
+                    • <a href="/t/{{ topic.id }}/lock">{% if topic.is_locked %}{{t!(self.ctx, "topic.t.unlock")}}{% else %}{{t!(self.ctx, "topic.t.lock")}}{% endif %}</a>
+                    {% endif %}
+                    {% if topic.op("delete") %}
+                    • <a href="/t/{{ topic.id }}/delete">{{t!(self.ctx, "topic.t.delete")}}</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Article Content -->
+            <div class="topic-content">
+                {{ topic.render() | safe }}
+            </div>
+
+            {% if topic.is_locked %}
+            <div class="sep10"></div>
+            <div class="box" style="background-color: #ffffc0; border: 1px solid #e2e2e2; color: #333; padding: 10px;">
+                {{t!(self.ctx, "topic.t.topic_locked_notice")}}
+            </div>
+            {% endif %}
+            {% if ctx.is_moderator() %}
+            <div class="inner" style="border-top: 1px solid var(--divider-color);">
+                {{t!(self.ctx, "topic.t.moderator_permissions")}}
+                <a href="/super/t/{{ topic.id }}/delete">{{t!(self.ctx, "topic.t.delete")}}</a>
+                • <a href="/super/t/{{ topic.id }}/move">{{t!(self.ctx, "topic.t.move")}}</a>
+                • <a href="/super/t/{{ topic.id }}/pin">{% if topic.is_pinned %}{{t!(self.ctx, "topic.t.unpin")}}{% else %}{{t!(self.ctx, "topic.t.pin")}}{% endif %}</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="sep20"></div>
+
+        <!-- Comments -->
+        {% if comments.total > 0 %}
+        <div class="box">
+            <div class="cell">
+                <span class="gray">{{ comments.total }} {{t!(self.ctx, "topic.t.replies_count")}}</span>
+            </div>
+            <div class="comments-list">
+                {% for comment in comments.data %}
+                <div class="comment-item" id="reply{{comment.floor}}">
+                    <a href="/u/{{ comment.username }}"><img src="/u/{{ comment.username }}/avatar.png?t={{ comment.avatar_timestamp }}"
+                                                             class="avatar"></a>
+                    <div class="content">
+                        <div class="meta">
+                            <span><a href="/u/{{ comment.username }}"><strong>{{ comment.username }}</strong></a>
+                                {% if comment.user_id == topic.user_id %}&nbsp;<span class="badge-op">OP</span>{% endif %} &nbsp;
+                                <span class="time">{{ ctx.t(comment.created_at) }}</span></span>
+                            <div class="actions">
+                                {% if comment.op("delete") %}
+                                <form action="/comment/{{ comment.id }}/delete" method="POST" style="display:inline;"
+                                      onsubmit='return confirm(`{{t!(self.ctx, "topic.t.are_you_sure_delete")}}`);'>
+                                    <button type="submit"
+                                            style="background:none; border:none; color:#ccc; cursor:pointer; font-size:12px;">
+                                        {{t!(self.ctx, "topic.t.delete")}}
+                                    </button>
+                                </form>
+                                {% endif %}
+                                {% if comment.op("super-delete") %}
+                                <a href="/super/comment/{{ comment.id }}/delete"
+                                   style="color:#ccc; font-size:12px; text-decoration: none;">
+                                    {{t!(self.ctx, "topic.t.delete")}}
+                                </a>
+                                {% endif %}
+                                <span class="floor">#{{ comment.floor }}</span>
+                            </div>
+                        </div>
+                        <div class="comment-body">
+                            {{ comment.render() | safe }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <!-- render pagination directly -->
+                {{ comments.render()|safe }}
+            </div>
+        </div>
+        <div class="sep20"></div>
+        {% else %}
+        <div class="box">
+            <div class="inner" style="text-align: center; color: var(--text-tertiary);">
+                {{t!(self.ctx, "topic.t.no_replies")}}
+            </div>
+        </div>
+        <div class="sep20"></div>
+        {% endif %}
+
+        <!-- Reply Form -->
+        {% if let Some(user) = current_user %}
+        {% if !topic.is_locked %}
+        <div class="box">
+            <div class="cell">{{t!(self.ctx, "topic.t.add_reply")}}</div>
+            <div class="inner">
+                <form action="/comment" method="POST" class="form form-topic">
+                    <input type="hidden" name="id" value="{{ topic.id }}"/>
+                    <input type="hidden" name="token" value="{{ token }}"/>
+                    <div class="form-row">
+                        <textarea id="comment-content" name="content" rows="6" required class="input-text"
+                                  style="min-height: 150px;"></textarea>
+                    </div>
+
+                    {% if let Some(turnstile) = turnstile %}
+                    <div class="form-row">
+                        <label></label>
+                        {% include "../../common/turnstile.html" %}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-row" style="justify-content: space-between;margin-top: -10px">
+                        <span id="comment-length-tips"></span>
+                        <button type="submit" class="button primary">{{t!(self.ctx, "topic.t.replies_count")}}</button>
+                    </div>
+                    <script>
+                        (function () {
+                            const length = (window.Intl && "Segmenter" in window.Intl)
+                                ? (function () {
+                                    const segmenter = new Intl.Segmenter();
+                                    return (text) => [...segmenter.segment(text)].length
+                                }())
+                                : ((text) => [...text].length);
+                            let textarea = document.querySelector("#comment-content");
+                            if (textarea) {
+                                textarea.addEventListener("input", e => {
+                                    if (!textarea.value) {
+                                        document.querySelector("#comment-length-tips").innerHTML = ""
+                                    } else {
+                                        document.querySelector("#comment-length-tips").innerHTML = `${length(textarea.value)} {{t!(self.ctx, "topic.t.characters")}}`
+                                    }
+                                });
+                            }
+                        })();
+
+                    </script>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+        {% else %}
+        {% if !topic.is_locked %}
+        <div class="box">
+            <div class="inner" style="text-align: center;">
+                {{t!(self.ctx, "topic.t.need")}} <a href="/login">{{t!(self.ctx, "topic.t.login")}}</a> {{t!(self.ctx, "topic.t.to_reply")}}
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+
+    <div id="Sidebar">
+        {% include "../modules/sidebar.html" %}
+    </div>
+</div>
+{% endblock %}

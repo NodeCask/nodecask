@@ -1,0 +1,58 @@
+{% extends "../layout.html" %} {% block content %}
+<div id="Main">
+    <div id="Content" class="full-width auth-page">
+        <div class="box auth-box">
+            <div class="cell" style="text-align: center; font-weight: bold">
+                {{t!(self.ctx, "auth.t.register")}}
+            </div>
+            <div class="inner">
+                <form action="/get-register-link" method="POST" class="form">
+                    <input type="hidden" name="token" value="{{token}}" />
+                    {% if !invite_code.is_empty() %}
+                    <input
+                        type="hidden"
+                        name="invite_code"
+                        value="{{invite_code}}"
+                    />
+                    {% endif %}
+                    <div class="form-row">
+                        <label for="email"
+                            >{{t!(self.ctx, "auth.t.email")}}</label
+                        >
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ email }}"
+                            required
+                        />
+                    </div>
+                    {% if let Some(turnstile) = turnstile %}
+                    <div class="form-row">
+                        <label></label>
+                        {% include "../../common/turnstile.html" %}
+                    </div>
+                    {% endif %}
+
+                    {% if !tips.is_empty() %}
+                    <div class="problem">{{ tips }}</div>
+                    {% endif %}
+
+                    <div class="form-actions" style="">
+                        <button type="submit" class="button primary">
+                            {{t!(self.ctx, "auth.t.next_step")}}
+                        </button>
+                    </div>
+                </form>
+                <div class="sep20"></div>
+                <div style="text-align: center; font-size: 14px">
+                    {{t!(self.ctx, "auth.t.already_have_account")}}<a
+                        href="/login"
+                        >{{t!(self.ctx, "auth.t.login_now")}}</a
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

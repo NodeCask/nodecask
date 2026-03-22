@@ -1,0 +1,8 @@
+{% if locale == "zh_CN" %}
+您在《<a href="/t/{{article.id}}">{{article.title}}</a>》的评论
+被管理员 <a href="/u/{{user.username}}">{{user.username}}</a> 删除。
+内容：{{content}}。原因：<p>{{reason}}</p>
+{% else %}
+Your comment in 《<a href="/t/{{article.id}}">{{article.title}}</a>》 has been deleted by moderator <a href="/u/{{user.username}}">{{user.username}}</a>.
+Content: {{content}}. Reason:<p>{{reason}}</p>
+{% endif %}

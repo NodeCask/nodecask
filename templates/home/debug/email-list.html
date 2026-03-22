@@ -1,0 +1,41 @@
+{% extends "home/layout.html" %}
+
+{% block content %}
+<div id="Content">
+    <div class="box">
+        <div class="cell">Email List</div>
+        <div class="inner">
+            <table width="100%" cellpadding="5" cellspacing="0" border="1"
+                   style="border-collapse: collapse; border-color: var(--border-color);">
+                <thead>
+                <tr style="background-color: var(--bg-body);">
+                    <th>ID</th>
+                    <th>Created At</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Subject</th>
+                    <th>Result</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for email in emails.data %}
+                <tr>
+                    <td>{{ email.id }}</td>
+                    <td>{{ ctx.t(email.created_at) }}</td>
+                    <td>{{ email.email_from }}</td>
+                    <td>{{ email.email_to }}</td>
+                    <td>{{ email.email_subject }}</td>
+                    <td>{{ email.result }}</td>
+                    <td><a href="/debug/emails/{{ email.id }}">View</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="cell">
+            {{ emails.render()|safe }}
+        </div>
+    </div>
+</div>
+{% endblock %}

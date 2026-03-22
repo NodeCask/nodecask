@@ -1,0 +1,33 @@
+{% extends "../layout.html" %}
+{% block content %}
+<div id="Main">
+    <div id="Content">
+        <div class="box">
+            <div class="cell">
+                <a href="/">{{ ctx.website.nickname }}</a> <span class="chevron">&nbsp;›&nbsp;</span> {{t!(self.ctx,
+                "node.t.select_node_to_post")}}
+            </div>
+
+            {% if nodes.is_empty() %}
+            <div class="inner">
+                <span class="fade">{{t!(self.ctx, "node.t.no_nodes")}}</span>
+            </div>
+            {% else %}
+            <div class="inner">
+                <ul class="nodes-grid">
+                    {% for node in nodes %}
+                    <li>
+                        <a href="/go/{{ node.slug }}/new" class="item_node">{{ node.name }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div id="Sidebar">
+        {% include "../modules/sidebar.html" %}
+    </div>
+</div>
+
+{% endblock %}
