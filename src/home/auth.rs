@@ -115,7 +115,7 @@ pub async fn register_form(
     }
     let cfg = store.get_register_config().await;
     let turnstile_cfg = store.get_turnstile_config().await;
-    let turnstile = turnstile_cfg.get_site_key("login");
+    let turnstile = turnstile_cfg.get_site_key("register");
     if cfg.email_verify {
         if q.token.clone().filter(|s| !s.is_empty()).is_none() {
             let token = store

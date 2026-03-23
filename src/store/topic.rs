@@ -299,7 +299,8 @@ WHERE ur.user_id IS NULL
 ORDER BY t.id DESC
 LIMIT ? "
         )
-            .bind(search.viewer_id).bind(search.recent_flag)
+            .bind(search.viewer_id)
+            .bind(search.recent_flag)
             .bind(&search.q)
             .bind(&search.q)
             .bind(&search.user_id)
@@ -312,6 +313,8 @@ LIMIT ? "
             .bind(&search.node_slug)
             .bind(search.viewer_id)
             .bind(range.before)
+            .bind(range.before)
+            .bind(range.after)
             .bind(range.after)
             .bind(range.amount)
             .fetch_all(&self.pool)
@@ -567,6 +570,8 @@ LIMIT ?
             .bind(&search.username)
             .bind(&search.username)
             .bind(range.before)
+            .bind(range.before)
+            .bind(range.after)
             .bind(range.after)
             .bind(range.amount)
             .fetch_all(&self.pool)

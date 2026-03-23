@@ -11,9 +11,11 @@ use axum::http::request::Parts;
 use axum::response::Response;
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use chrono::{DateTime, Utc};
 use futures_util::StreamExt;
 use log::{error, info, warn};
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 use tokio::select;
 
 pub struct Context {
@@ -159,9 +161,50 @@ async fn list_topics(ctx: Context, range: RangeQuery) -> Json<Data<Vec<TopicInde
     }
 }
 
-async fn get_topic(ctx: Context, Path(tid): Path<i64>) -> Json<Data<TopicDisplay>> {
+#[derive(Debug, Clone, FromRow, Serialize, Deserialize)]
+pub struct TopicDisplaySafe {
+    pub id: i64,
+    pub title: String,
+    pub content: String,       // 渲染后的文本
+    pub content_plain: String, // 原始文本
+    pub view_count: i64,
+    pub reply_count: i64,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub user_id: i64,
+    pub username: String,
+    pub last_reply_by: Option<String>,
+    pub node_id: i64,
+    pub node_name: String,
+    pub node_slug: String,
+    pub is_locked: bool,
+    pub is_pinned: bool,
+}
+impl From<TopicDisplay> for TopicDisplaySafe {
+    fn from(value: TopicDisplay) -> Self {
+        TopicDisplaySafe {
+            id: value.id,
+            title: value.title,
+            content: value.content_render, // 注意：这里映射为 content_render
+            content_plain: value.content_plain,
+            view_count: value.view_count,
+            reply_count: value.reply_count,
+            created_at: value.created_at,
+            updated_at: value.updated_at,
+            user_id: value.user_id,
+            username: value.username,
+            last_reply_by: value.last_reply_by,
+            node_id: value.node_id,
+            node_name: value.node_name,
+            node_slug: value.node_slug,
+            is_locked: value.is_locked,
+            is_pinned: value.is_pinned,
+        }
+    }
+}
+async fn get_topic(ctx: Context, Path(tid): Path<i64>) -> Json<Data<TopicDisplaySafe>> {
     match ctx.store().get_topic(tid).await {
-        Ok(Some(topic)) => Data::ok(topic),
+        Ok(Some(topic)) => Data::ok(topic.into()),
         Ok(None) => Data::error("Topic not found"),
         Err(err) => Data::error(&err.to_string()),
     }
