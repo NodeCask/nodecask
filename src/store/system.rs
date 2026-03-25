@@ -1,10 +1,12 @@
+use std::time::Instant;
 use anyhow::anyhow;
-use crate::daemon::config::GlobalConfig;
+use crate::daemon::config::{GlobalConfig, Overview};
 use crate::store::Store;
 use log::{error, warn};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use crate::store::topic::TopicDisplay;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
@@ -155,6 +157,15 @@ impl Store {
     pub async fn get_visit_config(&self) -> VisitConfig {
         self.get_cfg("visit_config").await.unwrap_or_default()
     }
+    pub async fn get_overview(&self) -> sqlx::Result<Overview> {
+        sqlx::query_as::<_, Overview>(
+            r#" select
+    (select count(*) from user) as users,
+    (select count(*) from topic) as topics,
+    (select count(*) from comment) as comments
+            "#
+        ).fetch_one(&self.pool).await
+    }
     pub async fn get_link_filter(&self) -> LinkFilterConfig {
         self.get_cfg("link_filter").await.unwrap_or_default()
     }
@@ -184,6 +195,7 @@ impl Store {
             links: self.get_links().await,
             injection: self.get_injection_config().await,
             visit: self.get_visit_config().await,
+            overview: (self.get_overview().await.unwrap_or_default(), Instant::now()),
         }
     }
 

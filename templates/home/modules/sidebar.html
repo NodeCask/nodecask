@@ -27,9 +27,9 @@
 {% else %}
 <div class="box">
     <div class="cell">
-        <strong>Tiny BBS</strong>
+        <strong>{{ctx.website.name}}</strong>
         <div class="sep5"></div>
-        <span class="fade">{{t!(self.ctx, "home.t.simple_forum")}}</span>
+        <span class="fade">{{ctx.website.description}}</span>
     </div>
     <div class="inner">
         <div class="sep5"></div>
@@ -45,9 +45,8 @@
 </div>
 {% endif %}
 
-<div class="sep20"></div>
-
 {% if !ctx.website.about.is_empty() %}
+<div class="sep20"></div>
 <div class="box">
     <div class="cell"><span class="fade">{{t!(self.ctx, "home.t.about_us")}}</span></div>
     <div class="inner">
@@ -55,3 +54,26 @@
     </div>
 </div>
 {% endif %}
+
+<div class="sep20"></div>
+
+<div class="box">
+    <div class="cell"><span class="fade">{{t!(self.ctx, "home.t.site_statistics")}}</span></div>
+    <div class="inner">
+        <ul style="list-style: none; margin: 0; padding: 0;">
+            <li style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--divider-color, #eee);">
+                <span class="fade">{{t!(self.ctx, "home.t.members_count")}}</span>
+                <strong style="color: var(--text-primary);">{{ctx.overview.users}}</strong>
+            </li>
+            <li style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--divider-color, #eee);">
+                <span class="fade">{{t!(self.ctx, "home.t.topics_count")}}</span>
+                <strong style="color: var(--text-primary);">{{ctx.overview.topics}}</strong>
+            </li>
+            <li style="display: flex; justify-content: space-between; padding: 5px 0;">
+                <span class="fade">{{t!(self.ctx, "home.t.replies_count")}}</span>
+                <strong style="color: var(--text-primary);">{{ctx.overview.comments}}</strong>
+            </li>
+        </ul>
+    </div>
+</div>
+

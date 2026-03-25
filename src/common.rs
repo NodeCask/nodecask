@@ -1,4 +1,4 @@
-use crate::daemon::config::GlobalConfigDaemon;
+use crate::daemon::config::{GlobalConfigDaemon, Overview, ReloadInstruct};
 use crate::daemon::email::EmailSenderDaemon;
 use crate::daemon::link_filter::LinkFilter;
 use crate::daemon::notify::NotifyDaemon;
@@ -30,6 +30,7 @@ use std::error::Error;
 use std::ops::Add;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::broadcast::error::{RecvError, SendError};
 use tower_sessions::Session;
 
@@ -304,6 +305,7 @@ pub struct VContext {
     pub title: String,
     pub current_user: OptionalCurrentUser,
     pub website: Website,
+    pub overview: Overview,
     pub links: Vec<LinkCollection>,
     pub injection: InjectionConfig,
     pub timezone: chrono_tz::Tz,
@@ -386,6 +388,7 @@ pub struct Context {
     pub website: Website,
     pub links: Vec<LinkCollection>,
     pub injection: InjectionConfig,
+    pub overview: Overview,
     pub timezone: chrono_tz::Tz,
     pub language: String,
 }
@@ -456,6 +459,7 @@ impl Context {
             title,
             current_user: self.current_user.clone(),
             website: self.website.clone(),
+            overview: self.overview.clone(),
             links: self.links.clone(),
             injection: self.injection.clone(),
             timezone: self.timezone.clone(),
@@ -491,6 +495,11 @@ impl FromRequestParts<AppState> for Context {
             .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "加载 CookieJar 失败"))?;
         let current_user = OptionalCurrentUser::from_request_parts(parts, state).await?;
         let cfg = state.cfg.get();
+        
+        // 因为网站没有什么人气，如果定时读取会产生多余的磁盘 IO，所以尽量较少后台定时器使用
+        if cfg.overview.1.elapsed() > Duration::from_mins(5) {
+            state.cfg.reload(ReloadInstruct::Overview).await;
+        }
         let timezone = current_user
             .as_ref()
             .map(|u| u.timezone.clone())
@@ -522,6 +531,7 @@ impl FromRequestParts<AppState> for Context {
             website: cfg.website,
             links: cfg.links,
             injection: cfg.injection,
+            overview: cfg.overview.0,
             timezone,
             language,
         })
@@ -589,6 +599,7 @@ impl Default for VContext {
         Self {
             title: "".to_string(),
             current_user: None,
+            overview: Overview::default(),
             website: Default::default(),
             links: vec![],
             injection: Default::default(),
