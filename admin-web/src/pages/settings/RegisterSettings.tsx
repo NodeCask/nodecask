@@ -13,6 +13,9 @@ export interface RegisterConfig {
     terms: string;
     initial_score: number;
     initial_avatar: string;
+    reserved_username: string[];
+    reserved_prefix: string[];
+    reserved_suffix: string[];
 }
 
 const load = () => pull<RegisterConfig>(`/settings?name=register_config`);
@@ -31,11 +34,21 @@ export const RegisterSettings: React.FC = () => {
         terms: "",
         initial_score: 100,
         initial_avatar: "",
+        reserved_username: [],
+        reserved_prefix: [],
+        reserved_suffix: [],
     });
 
     useEffect(() => {
         load()
-            .then(v => v && setForm(v))
+            .then(v => {
+                if(v){
+                    if(!Array.isArray(v.reserved_username)) v.reserved_username = [];
+                    if(!Array.isArray(v.reserved_prefix)) v.reserved_prefix = [];
+                    if(!Array.isArray(v.reserved_suffix)) v.reserved_suffix = [];
+                    setForm(v)
+                }
+            })
             .finally(() => dispatch({ type: "STOP_LOADING" }));
     }, []);
 
@@ -212,6 +225,75 @@ export const RegisterSettings: React.FC = () => {
                                     </Button>
                                 </Flex>
                             )}
+                        </Box>
+
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                保留用户名
+                            </Text>
+                            <TextArea
+                                value={form.reserved_username.join("\n")}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        reserved_username: e.target.value
+                                            .split("\n")
+                                            .map((s) => s.trim())
+                                            .filter((s) => s.length > 0),
+                                    })
+                                }
+                                placeholder="输入不允许注册的用户名"
+                                rows={5}
+                            />
+                            <Text size="1" color="gray" mt="1">
+                                每行输入一个用户名，忽略大小写
+                            </Text>
+                        </Box>
+
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                保留前缀
+                            </Text>
+                            <TextArea
+                                value={form.reserved_prefix.join("\n")}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        reserved_prefix: e.target.value
+                                            .split("\n")
+                                            .map((s) => s.trim())
+                                            .filter((s) => s.length > 0),
+                                    })
+                                }
+                                placeholder="输入不允许注册的域名前缀 (例如 admin)"
+                                rows={5}
+                            />
+                            <Text size="1" color="gray" mt="1">
+                                如果填写 "admin"，则 "admin123" 将无法注册
+                            </Text>
+                        </Box>
+
+                        <Box>
+                            <Text as="label" size="2" weight="medium" mb="1">
+                                保留后缀
+                            </Text>
+                            <TextArea
+                                value={form.reserved_suffix.join("\n")}
+                                onChange={(e) =>
+                                    setForm({
+                                        ...form,
+                                        reserved_suffix: e.target.value
+                                            .split("\n")
+                                            .map((s) => s.trim())
+                                            .filter((s) => s.length > 0),
+                                    })
+                                }
+                                placeholder="输入不允许注册的域名后缀 (例如 _bot)"
+                                rows={5}
+                            />
+                            <Text size="1" color="gray" mt="1">
+                                如果填写 "_bot"，则 "ai_bot" 将无法注册
+                            </Text>
                         </Box>
 
                         <Box>

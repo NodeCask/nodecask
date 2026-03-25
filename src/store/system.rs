@@ -212,6 +212,9 @@ pub struct RegisterConfig {
     pub terms: String,
     pub invite_code_required: bool,
     pub initial_score: i64,
+    pub reserved_username: Vec<String>, // 保留用户名
+    pub reserved_prefix: Vec<String>, // 保留前缀
+    pub reserved_suffix: Vec<String>, // 保留后缀
 }
 
 impl Default for RegisterConfig {
@@ -225,6 +228,9 @@ impl Default for RegisterConfig {
             terms: "".to_string(),
             invite_code_required: false,
             initial_score: 100,
+            reserved_username: vec![],
+            reserved_prefix: vec![],
+            reserved_suffix: vec![],
         }
     }
 }

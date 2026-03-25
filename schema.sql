@@ -107,7 +107,7 @@ CREATE TABLE invitation_usage
 CREATE TABLE IF NOT EXISTS "user"
 (
     id                      INTEGER primary key autoincrement,
-    username                TEXT unique NOT NULL,
+    username                TEXT unique NOT NULL COLLATE NOCASE,
     password_hash           TEXT        NOT NULL,
     email                   TEXT unique NOT NULL,
     role                    TEXT        NOT NULL DEFAULT 'user',
