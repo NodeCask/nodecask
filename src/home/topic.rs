@@ -435,7 +435,7 @@ pub async fn create_post(
     }
 
     moderator.push(Task::NewTopic(id)).await;
-    let _ = search.update_topic_idx(id).await; // 构建全文索引
+    search.update_topic_idx(id).await; // 构建全文索引
     // 广播发帖事件
     broadcast.send_silent(Message::NewTopic {
         id,
@@ -558,7 +558,7 @@ pub async fn edit_post(
         .await
         .map_err(ctx.err())?;
     moderator.push(Task::NewTopic(id)).await; // 推送消息到审核系统
-    let _ = search.update_topic_idx(id).await; // 更新全文索引
+    search.update_topic_idx(id).await; // 更新全文索引
     RedirectTemplate {
         tips: &t!(ctx, "topic.update_success"),
         url: &format!("/t/{}", id),
@@ -632,7 +632,7 @@ pub async fn delete_post(
     store: Store,
     Path(id): Path<i64>,
     GlobalContext(_notify): GlobalContext<NotifyDaemon>,
-    GlobalContext(_search): GlobalContext<SearchDaemon>,
+    GlobalContext(search): GlobalContext<SearchDaemon>,
     Form(form): Form<DeletePostForm>,
 ) -> WebResponse {
     let Some(article) = store.get_topic(id).await.map_err(ctx.err())? else {
@@ -656,6 +656,7 @@ pub async fn delete_post(
         _ => return ctx.error(t!(ctx, "topic.submit_expired")).into(),
     }
     store.delete_topic(id).await.map_err(ctx.err())?;
+    search.delete_topic_idx(id).await;
     RedirectTemplate {
         tips: &t!(ctx, "topic.delete_success"),
         url: "/",
@@ -910,7 +911,7 @@ pub mod manager {
         let article_id = article.id;
         let msg = Notify::topic_move(article_uid, article_id, tips);
         notify.send(msg).await;
-        let _ = search.delete_topic_idx(id).await; // 移除全文索引
+        search.delete_topic_idx(id).await; // 移除全文索引
         RedirectTemplate {
             tips: &t!(ctx, "topic.operation_success"),
             url: &format!("/go/{}", article.node_slug),

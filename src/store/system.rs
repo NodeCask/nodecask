@@ -6,7 +6,6 @@ use log::{error, warn};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use crate::store::topic::TopicDisplay;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]

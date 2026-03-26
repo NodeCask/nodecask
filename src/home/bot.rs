@@ -17,6 +17,7 @@ use log::{error, info, warn};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use tokio::select;
+use crate::daemon::tantivy::SearchDaemon;
 
 pub struct Context {
     store: Store,
@@ -284,6 +285,7 @@ struct CreateTopicResponse {
 
 async fn create_topic(
     ctx: Context,
+    GlobalContext(search): GlobalContext<SearchDaemon>,
     GlobalContext(notify): GlobalContext<NotifyDaemon>,
     Json(req): Json<CreateTopicRequest>,
 ) -> Json<Data<CreateTopicResponse>> {
@@ -319,6 +321,7 @@ async fn create_topic(
     {
         Ok(id) => {
             notify.topic_at_users(id, at_users).await; // 给提及用户推送消息
+            search.update_topic_idx(id).await; // 构建全文索引
             if let Err(e) = store.update_topic_bot_status(id, true).await {
                 error!("Failed to update topic bot status: {}", e);
             }

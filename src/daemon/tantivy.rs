@@ -167,13 +167,15 @@ impl SearchDaemon {
         self.channel.send(Instruct::Search(keyword, tx)).await?;
         rx.await?
     }
-    pub async fn update_topic_idx(&self, id: i64) -> anyhow::Result<()> {
-        self.channel.send(Instruct::TopicUpdate(id)).await?;
-        Ok(())
+    pub async fn update_topic_idx(&self, id: i64) {
+        if let Err(err) = self.channel.send(Instruct::TopicUpdate(id)).await {
+            warn!("Failed to update topic index: {}", err);
+        }
     }
-    pub async fn delete_topic_idx(&self, id: i64) -> anyhow::Result<()> {
-        self.channel.send(Instruct::TopicDelete(id)).await?;
-        Ok(())
+    pub async fn delete_topic_idx(&self, id: i64) {
+        if let Err(err) = self.channel.send(Instruct::TopicDelete(id)).await {
+            warn!("Failed to delete topic index: {}", err);
+        }
     }
 }
 
