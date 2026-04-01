@@ -161,7 +161,7 @@ pub fn router() -> Router<AppState> {
             "/settings",
             get(system::settings).post(system::settings_update),
         )
-        .route("/users", get(user::list))
+        .route("/users", get(user::list).post(user::create))
         .route("/users/{id}/status", post(user::update_status))
         .route("/users/{id}/role", post(user::update_role))
         .route("/users/{id}/reset-password", post(user::reset_password))

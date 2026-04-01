@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Badge, Box, Button, Card, Container, Dialog, Flex, Heading, Select, Table, Text, TextField, } from "@radix-ui/themes";
 import Pagination from "../components/Pagination";
 import { type PaginationParams, type PaginationResponse, pull, push, SysError } from "../api";
+import UserAddDialog, { type UserAddForm } from "../components/UserAddDialog";
 
 export interface User {
     id: number;
@@ -69,6 +70,11 @@ async function resetUserPassword(
     return push(`/users/${id}/reset-password`, { password });
 }
 
+// 添加用户
+async function addUser(data: UserAddForm): Promise<void> {
+    return push(`/users`, data);
+}
+
 // --- Components ---
 
 interface UserFiltersProps {
@@ -79,6 +85,7 @@ interface UserFiltersProps {
     roleFilter: string;
     onRoleFilterChange: (value: string) => void;
     onReset: () => void;
+    onAddUser: () => void;
 }
 
 const UserFilters: React.FC<UserFiltersProps> = ({
@@ -89,6 +96,7 @@ const UserFilters: React.FC<UserFiltersProps> = ({
     roleFilter,
     onRoleFilterChange,
     onReset,
+    onAddUser,
 }) => {
     return (
         <Card>
@@ -136,6 +144,9 @@ const UserFilters: React.FC<UserFiltersProps> = ({
 
                 <Button variant="soft" onClick={onReset}>
                     重置筛选
+                </Button>
+                <Button onClick={onAddUser} color="green">
+                    添加用户
                 </Button>
             </Flex>
         </Card>
@@ -434,6 +445,7 @@ const UserPage: React.FC = () => {
     const [roleDialogOpen, setRoleDialogOpen] = useState(false);
     const [statusDialogOpen, setStatusDialogOpen] = useState(false);
     const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+    const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [tempRole, setTempRole] = useState<string>("");
     const [newPassword, setNewPassword] = useState<string>("");
@@ -521,6 +533,21 @@ const UserPage: React.FC = () => {
         }
     };
 
+    const handleAddUserConfirm = async (formData: UserAddForm) => {
+        try {
+            await addUser(formData);
+            setAddUserDialogOpen(false);
+            await loadUsers();
+            alert(`用户 ${formData.username} 创建成功`);
+        } catch (err) {
+            const errorMessage =
+                err instanceof SysError ? err.message : "添加用户失败";
+            alert(errorMessage);
+            console.error("Failed to add user:", err);
+            throw new Error(errorMessage); // ensure loading state terminates
+        }
+    };
+
     return (
         <Container size="4">
             <Flex direction="column" gap="5">
@@ -546,6 +573,7 @@ const UserPage: React.FC = () => {
                         setStatusFilter("all");
                         setRoleFilter("all");
                     }}
+                    onAddUser={() => setAddUserDialogOpen(true)}
                 />
 
                 {/* Error Message */}
@@ -615,6 +643,12 @@ const UserPage: React.FC = () => {
                 password={newPassword}
                 onPasswordChange={setNewPassword}
                 onConfirm={handleResetPasswordConfirm}
+            />
+
+            <UserAddDialog
+                open={addUserDialogOpen}
+                onOpenChange={setAddUserDialogOpen}
+                onConfirm={handleAddUserConfirm}
             />
         </Container>
     );
