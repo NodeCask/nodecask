@@ -13,10 +13,6 @@ pub struct NodeUpdate {
     pub slug: String,
     pub description: String,
     pub show_in_list: bool,
-    pub background_image: String,
-    pub icon_image: String,
-    pub node_color: String,
-    pub custom_html: String,
     pub member_access_required: bool,
     pub moderator_access_required: bool,
     pub isolated: bool,
@@ -56,10 +52,6 @@ pub async fn create(
         &data.slug,
         &data.description,
         data.show_in_list,
-        &data.background_image,
-        &data.icon_image,
-        &data.node_color,
-        &data.custom_html,
         data.member_access_required,
         data.moderator_access_required,
         data.isolated,
@@ -114,10 +106,6 @@ pub async fn update(
         &data.slug,
         &data.description,
         data.show_in_list,
-        &data.background_image,
-        &data.icon_image,
-        &data.node_color,
-        &data.custom_html,
         data.member_access_required,
         data.moderator_access_required,
         data.isolated,
@@ -181,5 +169,104 @@ pub async fn delete(
             }
         }
         Err(e) => Data::<()>::error(&format!("删除失败: {}", e)).into_response(),
+    }
+}
+
+#[derive(Deserialize)]
+pub struct NodeAttrUpdate {
+    pub key: String,
+    pub value: String,
+}
+#[derive(Deserialize)]
+pub struct NodeAttrDelete {
+    pub key: String,
+}
+
+#[axum::debug_handler(state = AppState)]
+pub async fn get_attributes(
+    _ctx: Context,
+    store: Store,
+    Path(id): Path<i64>,
+) -> impl IntoResponse {
+    match store.get_node_by_id(id).await {
+        Ok(Some(node)) => {
+            Data::ok(node.attributes).into_response()
+        }
+        Ok(None) => {
+            Data::fail("节点未找到").into_response()
+        }
+        Err(err) => {
+            Data::fail(&format!("数据库读写异常: {}", err)).into_response()
+        }
+    }
+}
+
+#[axum::debug_handler(state = AppState)]
+pub async fn update_attributes(
+    _ctx: Context,
+    store: Store,
+    Path(id): Path<i64>,
+    Json(data): Json<NodeAttrUpdate>,
+) -> impl IntoResponse {
+    if data.key.is_empty() {
+        return Data::fail("属性名不能为空").into_response();
+    }
+
+    match store.get_node_by_id(id).await {
+        Ok(Some(_)) => {}
+        Ok(None) => {
+            return Data::fail("节点未找到").into_response();
+        }
+        Err(err) => {
+            return Data::fail(&format!("数据库读写异常: {}", err)).into_response();
+        }
+    }
+
+    let result = store.update_node_attr(id, &data.key, Some(&data.value)).await;
+
+    match result {
+        Ok(found) => {
+            if !found {
+                Data::fail("节点未找到").into_response()
+            } else {
+                Data::done().into_response()
+            }
+        }
+        Err(e) => Data::<()>::error(&format!("更新属性失败: {}", e)).into_response(),
+    }
+}
+
+#[axum::debug_handler(state = AppState)]
+pub async fn remove_attributes(
+    _ctx: Context,
+    store: Store,
+    Path(id): Path<i64>,
+    Json(data): Json<NodeAttrDelete>,
+) -> impl IntoResponse {
+    if data.key.is_empty() {
+        return Data::fail("属性名不能为空").into_response();
+    }
+
+    match store.get_node_by_id(id).await {
+        Ok(Some(_)) => {}
+        Ok(None) => {
+            return Data::fail("节点未找到").into_response();
+        }
+        Err(err) => {
+            return Data::fail(&format!("数据库读写异常: {}", err)).into_response();
+        }
+    }
+
+    let result = store.update_node_attr(id, &data.key, None).await;
+
+    match result {
+        Ok(found) => {
+            if !found {
+                Data::fail("节点未找到").into_response()
+            } else {
+                Data::done().into_response()
+            }
+        }
+        Err(e) => Data::<()>::error(&format!("更新属性失败: {}", e)).into_response(),
     }
 }

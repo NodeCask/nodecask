@@ -10,10 +10,6 @@ pub struct Node {
     pub slug: String,
     pub description: String,
     pub show_in_list: bool,
-    pub background_image: String,
-    pub icon_image: String,
-    pub node_color: String,
-    pub custom_html: String,
     pub member_access_required: bool,
     pub moderator_access_required: bool,
     pub isolated: bool,
@@ -22,10 +18,22 @@ pub struct Node {
     pub comment_reward: i64,
     pub topic_count: i64,
     pub created_at: DateTime<Utc>,
+    pub attributes: sqlx::types::Json<Vec<(String, String)>>,
 }
 impl Node {
     pub fn url(&self) -> String {
         format!("/go/{}", self.slug)
+    }
+    pub fn attr(&self, key: &str) -> Option<String> {
+        self.attributes.iter().find(|(k, _)| k == key)
+            .filter(|(_, v)| !v.is_empty())
+            .map(|(_, v)| v.clone())
+    }
+    pub fn is_enabled(&self, key: &str) -> bool {
+        self.attributes.iter()
+            .find(|(k, _)| k == key)
+            .map(|(_, v)| ["1", "y", "yes", "true"].contains(&v.as_str()))
+            .unwrap_or_default()
     }
 }
 impl Store {
@@ -37,17 +45,14 @@ impl Store {
        description,
        created_at,
        show_in_list,
-       background_image,
-       icon_image,
-       node_color,
-       custom_html,
        member_access_required,
        moderator_access_required,
        topic_reward,
        comment_reward,
        isolated,
        access_only,
-       topic_count
+       topic_count,
+       attributes
 FROM node
 WHERE slug = ?
 limit 1"#,
@@ -64,17 +69,14 @@ limit 1"#,
        description,
        created_at,
        show_in_list,
-       background_image,
-       icon_image,
-       node_color,
-       custom_html,
        member_access_required,
        moderator_access_required,
        topic_reward,
        comment_reward,
        isolated,
        access_only,
-       topic_count
+       topic_count,
+       attributes
 FROM node
 WHERE id = ?"#,
         )
@@ -103,10 +105,6 @@ WHERE id = ?"#,
         slug: &str,
         description: &str,
         show_in_list: bool,
-        background_image: &str,
-        icon_image: &str,
-        node_color: &str,
-        custom_html: &str,
         member_access_required: bool,
         moderator_access_required: bool,
         isolated: bool,
@@ -116,18 +114,13 @@ WHERE id = ?"#,
     ) -> sqlx::Result<()> {
         sqlx::query(
             r#"INSERT INTO node (name, slug, description,
-                   show_in_list, background_image, icon_image,
-                   node_color, custom_html, member_access_required, moderator_access_required, isolated, access_only, topic_reward, comment_reward, created_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))"#,
+                   show_in_list, member_access_required, moderator_access_required, isolated, access_only, topic_reward, comment_reward, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))"#,
         )
         .bind(name)
         .bind(slug)
         .bind(description)
         .bind(show_in_list)
-        .bind(background_image)
-        .bind(icon_image)
-        .bind(node_color)
-        .bind(custom_html)
         .bind(member_access_required)
         .bind(moderator_access_required)
         .bind(isolated)
@@ -146,10 +139,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))"#,
         slug: &str,
         description: &str,
         show_in_list: bool,
-        background_image: &str,
-        icon_image: &str,
-        node_color: &str,
-        custom_html: &str,
         member_access_required: bool,
         moderator_access_required: bool,
         isolated: bool,
@@ -163,10 +152,6 @@ set name             = ?,
     slug             = ?,
     description      = ?,
     show_in_list     = ?,
-    background_image = ?,
-    icon_image       = ?,
-    node_color       = ?,
-    custom_html      = ?,
     member_access_required = ?,
     moderator_access_required = ?,
     isolated = ?,
@@ -180,10 +165,6 @@ where id = ?
         .bind(slug)
         .bind(description)
         .bind(show_in_list)
-        .bind(background_image)
-        .bind(icon_image)
-        .bind(node_color)
-        .bind(custom_html)
         .bind(member_access_required)
         .bind(moderator_access_required)
         .bind(isolated)
@@ -196,6 +177,36 @@ where id = ?
 
         Ok(result.rows_affected() > 0)
     }
+
+    pub async fn update_node_attr(
+        &self,
+        id: i64,
+        key: &str,
+        value: Option<&str>,
+    ) -> sqlx::Result<bool> {
+        //language=sql
+        let mut attrs: sqlx::types::Json<Vec<(String, String)>> = sqlx::query_scalar("select attributes from node where id = ?")
+            .bind(id)
+            .fetch_one(&self.pool).await?;
+        // 移除原有同名属性
+        attrs.retain(|(k, _)| k != key);
+        // 添加新的属性
+        if let Some(v) = value {
+            attrs.push((key.to_string(), v.to_string()));
+        }
+        // 按 key 排序
+        attrs.sort_by(|(a, _), (b, _)| a.cmp(b));
+        let result = sqlx::query(
+            r#"update node set attributes = ? where id = ? "#,
+        )
+            .bind(attrs)
+            .bind(id)
+            .execute(&self.pool)
+            .await?;
+
+        Ok(result.rows_affected() > 0)
+    }
+
 
     // 删除节点的时候，必须提供一个新的节点 ID 用来防止关联帖子给删除
     pub async fn delete_node(&self, id: i64, move_to: i64) -> sqlx::Result<bool> {

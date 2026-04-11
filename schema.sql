@@ -182,22 +182,19 @@ CREATE TABLE IF NOT EXISTS "comment"
 CREATE TABLE IF NOT EXISTS "node"
 (
     id                        INTEGER primary key autoincrement,
-    name                      TEXT unique                        not null,
-    slug                      TEXT unique                        not null,
-    description               TEXT                               not null,
-    created_at                DATETIME default CURRENT_TIMESTAMP not null,
-    show_in_list              INTEGER  default 1                 not null,
-    background_image          TEXT     default ''                not null,
-    icon_image                TEXT     default ''                not null,
-    node_color                TEXT     default ''                not null,
-    custom_html               text     default ''                not null,
-    member_access_required    integer  default 0                 not null,
-    moderator_access_required integer  default 0                 not null,
-    topic_reward              INTEGER  default 0                 not null,
-    comment_reward            INTEGER  default 0                 not null,
-    isolated                  integer  default 0                 not null,
-    access_only               integer  default 0                 not null,
-    topic_count               integer  default 0                 not null
+    name                      TEXT unique                                                   not null,
+    slug                      TEXT unique                                                   not null,
+    description               TEXT                                                          not null,
+    created_at                DATETIME                            default CURRENT_TIMESTAMP not null,
+    show_in_list              INTEGER                             default 1                 not null,
+    attributes                text CHECK (json_valid(attributes)) default '[]'              not null,
+    member_access_required    integer                             default 0                 not null,
+    moderator_access_required integer                             default 0                 not null,
+    topic_reward              INTEGER                             default 0                 not null,
+    comment_reward            INTEGER                             default 0                 not null,
+    isolated                  integer                             default 0                 not null,
+    access_only               integer                             default 0                 not null,
+    topic_count               integer                             default 0                 not null
 );
 CREATE TRIGGER update_node_topic_count_insert
     AFTER INSERT

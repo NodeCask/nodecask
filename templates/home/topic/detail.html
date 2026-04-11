@@ -3,17 +3,9 @@
     <meta property="og:title" content="{{topic.title}}">
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="{{topic.title}}">
-    {% if !node.background_image.is_empty() %}
-    <style>
-        body {
-            background-image: url("{{node.background_image}}");
-        }
-    </style>
-{% endif %}
 {% endblock %}
 
 {% block content %}
-{% if !node.custom_html.is_empty() %}{{node.custom_html|safe}}{% endif %}
 <div id="Main">
     <div id="Content">
         <div class="box" style="border-bottom: none;">

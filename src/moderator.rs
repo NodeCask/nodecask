@@ -154,6 +154,7 @@ pub fn router() -> Router<AppState> {
         .route("/nodes", get(node::list).post(node::create))
         .route("/nodes/{id}", post(node::update))
         .route("/nodes/{id}/delete", post(node::delete))
+        .route("/nodes/{id}/attributes", get(node::get_attributes).post(node::update_attributes).delete(node::remove_attributes))
         .route("/pages", get(page::list).post(page::create))
         .route("/pages/{id}", post(page::update))
         .route("/pages/{id}/delete", post(page::delete))

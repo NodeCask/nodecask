@@ -1,13 +1,5 @@
 {% extends "../layout.html" %}
 {% block content %}
-{% if !node.custom_html.is_empty() %}{{node.custom_html|safe}}{% endif %}
-{% if !node.background_image.is_empty() %}
-<style>
-    body{
-        background-image: url("{{node.background_image}}");
-    }
-</style>
-{% endif %}
 <div id="Main">
     <div id="Content">
         <div class="box">
@@ -22,7 +14,7 @@
                     <div class="form-row">
                         <label for="title">{{t!(self.ctx, "topic.t.title")}}</label>
                         <input type="text" id="title" name="title" value="{{ topic.title }}" required
-                            placeholder="{{t!(self.ctx, "topic.t.enter_title_placeholder")}}" class="input-text">
+                            placeholder='{{t!(self.ctx, "topic.t.enter_title_placeholder")}}' class="input-text">
                     </div>
 
                     <div class="form-row">

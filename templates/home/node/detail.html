@@ -1,25 +1,16 @@
 {% extends "../layout.html" %}
-{% block head %}
-{% if !node.background_image.is_empty() %}
-<style>
-    body {
-        background-image: url("{{node.background_image}}");
-    }
-</style>
-{% endif %}
-{% endblock %}
 
 {% block content %}
-{% if !node.custom_html.is_empty() %}{{node.custom_html|safe}}{% endif %}
+{% if let Some(html) = node.attr("custom_html") %}{{html|safe}}{% endif %}
 <div id="Main">
     <div id="Content">
         <!-- node header -->
         <div class="box node-header">
             <div class="node-avatar">
-                {% if node.icon_image.is_empty() %}
-                <img src="/public/NodeCask.png" />
+                {% if let Some(icon) = node.attr("icon_image") %}
+                <img src="{{icon}}" />
                 {% else %}
-                <img src="{{node.icon_image}}" />
+                <img src="/public/NodeCask.png" />
                 {% endif %}
             </div>
             <div class="node-info">

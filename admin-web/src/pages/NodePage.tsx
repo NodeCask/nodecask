@@ -24,11 +24,7 @@ export interface Category {
     slug: string;
     description: string;
     show_in_list: boolean;
-    background_image: string;
-    icon_image: string;
-    node_color: string;
     created_at: string;
-    custom_html: string;
     member_access_required: boolean;
     moderator_access_required: boolean;
     isolated: boolean;
@@ -42,10 +38,6 @@ interface CategoryCreateParams {
     slug: string;
     description: string;
     show_in_list: boolean;
-    background_image: string;
-    icon_image: string;
-    node_color: string;
-    custom_html: string;
     member_access_required: boolean;
     moderator_access_required: boolean;
     isolated: boolean;
@@ -59,10 +51,6 @@ interface CategoryUpdateParams {
     slug: string;
     description: string;
     show_in_list: boolean;
-    background_image: string;
-    icon_image: string;
-    node_color: string;
-    custom_html: string;
     member_access_required: boolean;
     moderator_access_required: boolean;
     isolated: boolean;
@@ -89,6 +77,14 @@ async function deleteCategory(id: number): Promise<void> {
     return push(`/nodes/${id}/delete`);
 }
 
+async function getNodeAttributes(id: number): Promise<[string, string][]> {
+    return pull<[string, string][]>(`/nodes/${id}/attributes`);
+}
+
+async function updateNodeAttribute(id: number, key: string, value: string): Promise<void> {
+    return push(`/nodes/${id}/attributes`, { key, value });
+}
+
 // ============= Components =============
 
 const CategoryList: React.FC<{
@@ -106,7 +102,6 @@ const CategoryList: React.FC<{
                     <Table.ColumnHeaderCell style={{ minWidth: "120px" }}>Slug</Table.ColumnHeaderCell>
                     <Table.ColumnHeaderCell style={{ minWidth: "100px" }}>首页显示</Table.ColumnHeaderCell>
                     <Table.ColumnHeaderCell style={{ minWidth: "100px" }}>访问权限</Table.ColumnHeaderCell>
-                    <Table.ColumnHeaderCell style={{ minWidth: "100px" }}>外观</Table.ColumnHeaderCell>
                     <Table.ColumnHeaderCell style={{ minWidth: "100px" }}>操作</Table.ColumnHeaderCell>
                 </Table.Row>
             </Table.Header>
@@ -151,37 +146,6 @@ const CategoryList: React.FC<{
                             </Flex>
                         </Table.Cell>
                         <Table.Cell>
-                            <Flex gap="2" align="center">
-                                {category.node_color && (
-                                    <Box
-                                        style={{
-                                            width: 16,
-                                            height: 16,
-                                            borderRadius: "50%",
-                                            backgroundColor: category.node_color,
-                                            border: "1px solid #ddd",
-                                        }}
-                                        title={`颜色: ${category.node_color}`}
-                                    />
-                                )}
-                                {category.icon_image && (
-                                    <Text size="1" color="blue" title={category.icon_image}>
-                                        图标
-                                    </Text>
-                                )}
-                                {category.background_image && (
-                                    <Text size="1" color="blue" title={category.background_image}>
-                                        背景
-                                    </Text>
-                                )}
-                                {category.custom_html && (
-                                    <Text size="1" color="blue" title="含有自定义 HTML">
-                                        HTML
-                                    </Text>
-                                )}
-                            </Flex>
-                        </Table.Cell>
-                        <Table.Cell>
                             <Flex gap="2">
                                 <Button
                                     size="1"
@@ -219,10 +183,6 @@ const CategoryCreateDialog: React.FC<{
         slug: "",
         description: "",
         show_in_list: true,
-        background_image: "",
-        icon_image: "",
-        node_color: "",
-        custom_html: "",
         member_access_required: false,
         moderator_access_required: false,
         isolated: false,
@@ -245,10 +205,6 @@ const CategoryCreateDialog: React.FC<{
                 slug: "",
                 description: "",
                 show_in_list: true,
-                background_image: "",
-                icon_image: "",
-                node_color: "",
-                custom_html: "",
                 member_access_required: false,
                 moderator_access_required: false,
                 isolated: false,
@@ -277,8 +233,6 @@ const CategoryCreateDialog: React.FC<{
                         <Tabs.Trigger value="basic">基本信息</Tabs.Trigger>
                         <Tabs.Trigger value="permissions">权限与设置</Tabs.Trigger>
                         <Tabs.Trigger value="rewards">奖励</Tabs.Trigger>
-                        <Tabs.Trigger value="appearance">外观</Tabs.Trigger>
-                        <Tabs.Trigger value="advanced">高级</Tabs.Trigger>
                     </Tabs.List>
 
                     <Box pt="3">
@@ -418,78 +372,6 @@ const CategoryCreateDialog: React.FC<{
                             </Flex>
                         </Tabs.Content>
 
-                        <Tabs.Content value="appearance">
-                            <Flex direction="column" gap="3">
-                                <Box>
-                                    <Text as="label" size="2" weight="medium" mb="1">
-                                        背景图片 URL
-                                    </Text>
-                                    <TextField.Root
-                                        placeholder="输入背景图片 URL"
-                                        value={form.background_image}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                background_image: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </Box>
-
-                                <Box>
-                                    <Text as="label" size="2" weight="medium" mb="1">
-                                        图标 URL
-                                    </Text>
-                                    <TextField.Root
-                                        placeholder="输入图标 URL"
-                                        value={form.icon_image}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                icon_image: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </Box>
-
-                                <Box>
-                                    <Text as="label" size="2" weight="medium" mb="1">
-                                        节点颜色代码
-                                    </Text>
-                                    <TextField.Root
-                                        placeholder="例如: #ff0000"
-                                        value={form.node_color}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                node_color: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </Box>
-                            </Flex>
-                        </Tabs.Content>
-
-                        <Tabs.Content value="advanced">
-                            <Flex direction="column" gap="3">
-                                <Box>
-                                    <Text as="label" size="2" weight="medium" mb="1">
-                                        自定义 HTML
-                                    </Text>
-                                    <TextArea
-                                        placeholder="输入自定义 HTML 内容"
-                                        rows={5}
-                                        value={form.custom_html}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                custom_html: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </Box>
-                            </Flex>
-                        </Tabs.Content>
                     </Box>
                 </Tabs.Root>
 
@@ -518,10 +400,6 @@ const CategoryEditDialog: React.FC<{
         slug: "",
         description: "",
         show_in_list: true,
-        background_image: "",
-        icon_image: "",
-        node_color: "",
-        custom_html: "",
         member_access_required: false,
         moderator_access_required: false,
         isolated: false,
@@ -530,6 +408,10 @@ const CategoryEditDialog: React.FC<{
         comment_reward: 0,
     });
 
+    const [iconImage, setIconImage] = useState("");
+    const [customHtml, setCustomHtml] = useState("");
+    const [attrLoading, setAttrLoading] = useState(false);
+
     useEffect(() => {
         if (category) {
             setForm({
@@ -537,10 +419,6 @@ const CategoryEditDialog: React.FC<{
                 slug: category.slug,
                 description: category.description,
                 show_in_list: category.show_in_list,
-                background_image: category.background_image,
-                icon_image: category.icon_image,
-                node_color: category.node_color,
-                custom_html: category.custom_html,
                 member_access_required: category.member_access_required,
                 moderator_access_required: category.moderator_access_required,
                 isolated: category.isolated || false,
@@ -551,6 +429,26 @@ const CategoryEditDialog: React.FC<{
         }
     }, [category]);
 
+    useEffect(() => {
+        if (open && category) {
+            setAttrLoading(true);
+            getNodeAttributes(category.id)
+                .then((attrs) => {
+                    const attrMap = new Map(attrs);
+                    setIconImage(attrMap.get("icon_image") || "");
+                    setCustomHtml(attrMap.get("custom_html") || "");
+                })
+                .catch(() => {
+                    setIconImage("");
+                    setCustomHtml("");
+                })
+                .finally(() => setAttrLoading(false));
+        } else {
+            setIconImage("");
+            setCustomHtml("");
+        }
+    }, [open, category]);
+
     const handleUpdate = async () => {
         if (!category || !form.name || !form.slug) {
             alert("请填写分类名称和 Slug");
@@ -559,6 +457,9 @@ const CategoryEditDialog: React.FC<{
 
         try {
             await updateCategory(category.id, form);
+            // 保存自定义属性
+            await updateNodeAttribute(category.id, "icon_image", iconImage);
+            await updateNodeAttribute(category.id, "custom_html", customHtml);
             onOpenChange(false);
             onSuccess();
         } catch (err) {
@@ -582,7 +483,6 @@ const CategoryEditDialog: React.FC<{
                         <Tabs.Trigger value="permissions">权限与设置</Tabs.Trigger>
                         <Tabs.Trigger value="rewards">奖励</Tabs.Trigger>
                         <Tabs.Trigger value="appearance">外观</Tabs.Trigger>
-                        <Tabs.Trigger value="advanced">高级</Tabs.Trigger>
                     </Tabs.List>
 
                     <Box pt="3">
@@ -718,56 +618,39 @@ const CategoryEditDialog: React.FC<{
 
                         <Tabs.Content value="appearance">
                             <Flex direction="column" gap="3">
+                                {attrLoading && (
+                                    <Text size="2" color="gray">加载属性中...</Text>
+                                )}
                                 <Box>
                                     <Text as="label" size="2" weight="medium" mb="1">
-                                        背景图片 URL
+                                        节点图标地址
                                     </Text>
                                     <TextField.Root
-                                        placeholder="输入背景图片 URL"
-                                        value={form.background_image}
-                                        onChange={(e) => setForm({ ...form, background_image: e.target.value })}
+                                        placeholder="输入图标图片 URL"
+                                        value={iconImage}
+                                        onChange={(e) => setIconImage(e.target.value)}
                                     />
-                                </Box>
-
-                                <Box>
-                                    <Text as="label" size="2" weight="medium" mb="1">
-                                        图标 URL
+                                    <Text size="1" color="gray" mt="1">
+                                        节点的图标图片链接，留空则不显示
                                     </Text>
-                                    <TextField.Root
-                                        placeholder="输入图标 URL"
-                                        value={form.icon_image}
-                                        onChange={(e) => setForm({ ...form, icon_image: e.target.value })}
-                                    />
                                 </Box>
-
                                 <Box>
                                     <Text as="label" size="2" weight="medium" mb="1">
-                                        节点颜色代码
-                                    </Text>
-                                    <TextField.Root
-                                        placeholder="例如: #ff0000"
-                                        value={form.node_color}
-                                        onChange={(e) => setForm({ ...form, node_color: e.target.value })}
-                                    />
-                                </Box>
-                            </Flex>
-                        </Tabs.Content>
-
-                        <Tabs.Content value="advanced">
-                            <Flex direction="column" gap="3">
-                                <Box>
-                                    <Text as="label" size="2" weight="medium" mb="1">
-                                        自定义 HTML
+                                        自定义 HTML 代码
                                     </Text>
                                     <TextArea
-                                        placeholder="输入自定义 HTML 内容"
+                                        placeholder="输入自定义 HTML 代码"
                                         rows={5}
-                                        value={form.custom_html}
-                                        onChange={(e) => setForm({ ...form, custom_html: e.target.value })}
+                                        value={customHtml}
+                                        onChange={(e) => setCustomHtml(e.target.value)}
                                     />
+                                    <Text size="1" color="gray" mt="1">
+                                        可在节点页面中嵌入自定义 HTML 内容
+                                    </Text>
                                 </Box>
                             </Flex>
                         </Tabs.Content>
+
                     </Box>
                 </Tabs.Root>
 
