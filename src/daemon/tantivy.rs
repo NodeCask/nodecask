@@ -246,7 +246,7 @@ impl IndexService {
         );
         let query = query_parser.parse_query(keyword)?;
         let top_docs: Vec<(Score, DocAddress)> =
-            searcher.search(&query, &TopDocs::with_limit(100))?;
+            searcher.search(&query, &TopDocs::with_limit(100).order_by_score())?;
         let mut result = vec![];
         info!("Searching topics: {}, results: {}", keyword, top_docs.len());
         for (_score, doc_address) in top_docs {

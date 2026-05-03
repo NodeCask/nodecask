@@ -1,5 +1,5 @@
-use chrono::Utc;
 use crate::store::Store;
+use chrono::Utc;
 use log::{info, warn};
 use mail_send::mail_builder::headers::address::Address;
 use mail_send::mail_builder::headers::Header;
@@ -89,8 +89,10 @@ async fn run_worker(store: Store, mut receiver: tokio::sync::mpsc::Receiver<Inst
         match ins {
             Instruct::Reload => {
                 let cfg: Option<SmtpConfig> = store.get_cfg("smtp_config").await;
-                sender_cfg = cfg.map(|cfg| {
+                sender_cfg = cfg.and_then(|cfg| {
                     let builder = SmtpClientBuilder::new(cfg.hostname.clone(), cfg.port)
+                        .inspect_err(|err| warn!("Couldn't create SMTP client: {}", err))
+                        .ok()?
                         .implicit_tls(cfg.tls_implicit)
                         .credentials((cfg.username.clone(), cfg.password.clone()));
                     let address = Address::new_address(
@@ -105,14 +107,14 @@ async fn run_worker(store: Store, mut receiver: tokio::sync::mpsc::Receiver<Inst
                             cfg.username.clone()
                         },
                     );
-                    SenderConfig {
+                    Some(SenderConfig {
                         address,
                         builder,
                         limit: Limit {
                             max_per_hour: cfg.max_per_hour,
                             max_per_day: cfg.max_per_day,
                         },
-                    }
+                    })
                 });
             }
             Instruct::Mail(id) => {
@@ -192,11 +194,9 @@ async fn process_email(store: &Store, id: i64, sender_cfg: &Option<SenderConfig>
 
 fn address_to_string(addr: &Address) -> String {
     // 这里貌似存在一个 bug，write_header 这个方法返回写死 0, 所以要使用 Vec<u8>
-    let mut buffer:Vec<u8> = Vec::with_capacity(1024);
-    match addr.write_header(&mut buffer,0) {
-        Ok(_) => {
-            String::from_utf8_lossy(buffer.as_slice()).to_string()
-        }
+    let mut buffer: Vec<u8> = Vec::with_capacity(1024);
+    match addr.write_header(&mut buffer, 0) {
+        Ok(_) => String::from_utf8_lossy(buffer.as_slice()).to_string(),
         Err(_) => {
             format!("{:?}", addr)
         }
