@@ -108,6 +108,7 @@ pub struct TopicSearch {
     pub node_slug: Option<String>, // 发帖版块
     pub viewer_id: Option<i64>, // 设定访问用户，用来排除屏蔽
     pub recent_flag: bool,    // 如果 recent_flag 标记开启的话，会检查 nodes.show_in_list 标记
+    pub anonymous: bool,    // 是否显示匿名帖子「楼主删除帖子内容之后，会变成匿名帖子，只有标题没有内容」
 }
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct CommentSearch {
@@ -174,6 +175,7 @@ WHERE
     (? is NULL or u.username = ?) and
     (? is NULL or n.id = ?) and
     (? is NULL or n.slug = ?) and
+    (? or u.username != 'anonymous') and
     (n.isolated = 0 or t.user_id = ?)"#,
         )
         .bind(search.viewer_id)
@@ -188,6 +190,7 @@ WHERE
         .bind(&search.node_id)
         .bind(&search.node_slug)
         .bind(&search.node_slug)
+        .bind(search.anonymous)
         .bind(search.viewer_id)
         .fetch_one(&self.pool)
         .await?;
@@ -231,6 +234,7 @@ WHERE ur.user_id IS NULL
   and (? is NULL or u.username = ?)
   and (? is NULL or n.id = ?)
   and (? is NULL or n.slug = ?)
+  and (? or u.username != 'anonymous')
   and (n.isolated = 0 or t.user_id = ?)";
         let data: Vec<TopicIndex> = sqlx::query_as::<_, TopicIndex>(&format!(
             "{sql} ORDER BY t.is_pinned DESC, {order_col} DESC LIMIT ?,?
@@ -248,6 +252,7 @@ WHERE ur.user_id IS NULL
         .bind(&search.node_id)
         .bind(&search.node_slug)
         .bind(&search.node_slug)
+        .bind(search.anonymous)
         .bind(search.viewer_id)
         .bind(page.start())
         .bind(page.size())
@@ -286,7 +291,7 @@ FROM topic t
          JOIN user u ON t.user_id = u.id
          JOIN node n ON t.node_id = n.id
          LEFT JOIN user_relation ur ON ur.target_id = t.user_id AND ur.relation = 'block' AND ur.user_id = ?
-WHERE ur.user_id IS NULL
+WHERE ur.user_id IS NULL and u.username != 'anonymous'
   AND (? is false or n.show_in_list)
   and (? is NULL or t.title like '%' || ? || '%')
   and (? is NULL or u.id = ?)
@@ -399,11 +404,23 @@ VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'), ?)"#)
         Ok(())
     }
 
+    // 删除帖子，会保留帖子标题和所有回复，但是内容和作者信息会被移除，并且锁定帖子不能回复
+    // 我们不要求所有数据可以溯源
     pub async fn delete_topic(&self, id: i64) -> sqlx::Result<()> {
-        sqlx::query("DELETE FROM topic WHERE id = ?")
+        let comments = sqlx::query_scalar("select count(*) FROM comment WHERE article_id = ?")
             .bind(id)
-            .execute(&self.pool)
-            .await?;
+            .fetch_optional(&self.pool)
+            .await?
+            .unwrap_or(0);
+        if comments > 0 {
+            sqlx::query("UPDATE topic SET user_id = 999, content = '', content_plain = '', content_render = '', is_locked = true WHERE id = ?")
+                .bind(id)
+                .execute(&self.pool)
+                .await?;
+        } else {
+            sqlx::query("DELETE FROM topic WHERE id = ?").bind(id).execute(&self.pool)
+                .await?;
+        }
         Ok(())
     }
 
@@ -454,7 +471,7 @@ FROM topic t
          JOIN user u ON t.user_id = u.id
          JOIN node n ON t.node_id = n.id
          LEFT JOIN user_relation ur ON ur.target_id = t.user_id AND ur.relation = 'block' AND ur.user_id = ?
-WHERE n.show_in_list and ur.user_id IS NULL
+WHERE n.show_in_list and ur.user_id IS NULL and u.username != 'anonymous'
 ORDER BY t.is_pinned DESC, t.rank_score DESC
 LIMIT 20"#,
         )

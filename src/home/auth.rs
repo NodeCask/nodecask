@@ -396,6 +396,15 @@ pub async fn register_post(
     }
 
     let lower_username = form.username.to_lowercase();
+
+    if lower_username == "anonymous" || lower_username == "administrator" || lower_username == "guest" {
+        return AuthRegisterTemplate {
+            tips: t_owned!(ctx, "auth.username_reserved"),
+            ctx: ctx.context(t_owned!(ctx, "auth.register")),
+            ..placeholder
+        }
+            .into();
+    }
     if cfg.reserved_username.iter().any(|u| u.to_lowercase() == lower_username)
         || cfg.reserved_prefix.iter().any(|p| !p.is_empty() && lower_username.starts_with(&p.to_lowercase()))
         || cfg.reserved_suffix.iter().any(|s| !s.is_empty() && lower_username.ends_with(&s.to_lowercase()))

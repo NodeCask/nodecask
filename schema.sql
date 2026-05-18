@@ -131,6 +131,8 @@ CREATE TABLE IF NOT EXISTS "user"
     public_email            INTEGER     NOT NULL DEFAULT 0,
     totp_secret             TEXT
 );
+insert into user (id, username, password_hash, email, totp_secret)
+values (999, 'anonymous', '', '', null);
 CREATE TABLE user_login_rewards
 (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,

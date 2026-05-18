@@ -1510,6 +1510,7 @@ pub async fn rss_recent(
         node_slug: None,
         viewer_id: user.map(|u| u.id),
         recent_flag: true,
+        anonymous: false,
     };
     let articles = match store.topics(&search, page.topic()).await {
         Ok(data) => data,
@@ -1583,6 +1584,7 @@ pub async fn recent(
         node_slug: None,
         viewer_id: user.map(|u| u.id),
         recent_flag: true,
+        anonymous: false,
     };
     let articles = store
         .topics(&search, page.topic())

@@ -17,7 +17,11 @@
                 <h1>{{ topic.title }}</h1>
                 <div class="topic-meta">
                     <a href="/go/{{ topic.node_slug }}" class="node">{{ topic.node_name }}</a> •
+                    {% if topic.username == "anonymous" %}
+                    <strong>{{ topic.username }}</strong> •
+                    {% else %}
                     <a href="/u/{{ topic.username }}" class="author"><strong>{{ topic.username }}</strong></a> •
+                    {% endif %}
                     <span>{{ ctx.t(topic.created_at) }}</span> •
                     <span>{{ topic.view_count }} {{t!(self.ctx, "topic.t.views")}}</span>
 
@@ -38,7 +42,12 @@
                 {{ topic.render() | safe }}
             </div>
 
-            {% if topic.is_locked %}
+            {% if topic.username == "anonymous" %}
+            <div class="sep10"></div>
+            <div class="box" style="background-color: #ffffc0; border: 1px solid #e2e2e2; color: #333; padding: 10px;">
+                内容已经被作者删除
+            </div>
+            {% else if topic.is_locked %}
             <div class="sep10"></div>
             <div class="box" style="background-color: #ffffc0; border: 1px solid #e2e2e2; color: #333; padding: 10px;">
                 {{t!(self.ctx, "topic.t.topic_locked_notice")}}

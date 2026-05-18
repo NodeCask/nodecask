@@ -91,6 +91,13 @@ pub async fn info(
     Path(username): Path<String>,
     user: OptionalCurrentUser,
 ) -> WebResponse {
+    if username == "anonymous" {
+        return Ok((
+            StatusCode::NOT_FOUND,
+            ctx.error(t!(ctx, "user.user_not_found")),
+        )
+            .into_response());
+    }
     let Some(profile_user) = store.get_user(username.as_str()).await.map_err(ctx.err())? else {
         return Ok((
             StatusCode::NOT_FOUND,
