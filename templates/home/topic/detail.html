@@ -45,7 +45,7 @@
             {% if topic.username == "anonymous" %}
             <div class="sep10"></div>
             <div class="box" style="background-color: #ffffc0; border: 1px solid #e2e2e2; color: #333; padding: 10px;">
-                内容已经被作者删除
+                {{t!(self.ctx, "topic.t.topic_deleted_notice")}}
             </div>
             {% else if topic.is_locked %}
             <div class="sep10"></div>

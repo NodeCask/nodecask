@@ -43,7 +43,7 @@ pub async fn update_status(
     Path(id): Path<i64>,
     Json(form): Json<UserStatusForm>,
 ) -> impl IntoResponse {
-    if id == 1 {
+    if id <= 1000 {
         return Data::fail("禁止修改超级管理员账户状态").into_response();
     }
     let active = match form.action.as_str() {
@@ -79,7 +79,7 @@ pub async fn update_role(
     Path(id): Path<i64>,
     Json(form): Json<UserRoleForm>,
 ) -> impl IntoResponse {
-    if id == 1 {
+    if id <= 1000 {
         return Data::fail("禁止修改超级管理员账户状态").into_response();
     }
     let valid_roles = vec!["user", "moderator", "administrator"];
@@ -106,7 +106,7 @@ pub async fn reset_password(
     Path(id): Path<i64>,
     Json(form): Json<UserPasswordResetForm>,
 ) -> impl IntoResponse {
-    if id == 1 {
+    if id <= 1000 {
         return Data::fail("禁止修改超级管理员密码").into_response();
     }
 

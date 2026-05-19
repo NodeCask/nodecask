@@ -694,8 +694,20 @@ pub async fn login_post(
             .into();
         }
     };
+    
+    // 查询用户密码
+    let Some(password_hash) = store.get_user_password(user.id).await
+        .map_err(ctx.err())?
+    else {
+        return AuthLoginTemplate {
+            tips: t_owned!(ctx, "auth.invalid_credentials"),
+            ctx: ctx.context(t_owned!(ctx, "auth.login")),
+            ..placeholder
+        }
+            .into();
+    };
 
-    if !verify_password(&form.password, &user.password_hash).unwrap_or(false) {
+    if password_hash.is_empty() || !verify_password(&form.password, &password_hash).unwrap_or(false) {
         let c = PasswordChallengeCounter {
             count: counter + 1,
             expires: chrono::Utc::now() + chrono::Duration::hours(1),

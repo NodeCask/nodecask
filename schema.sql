@@ -108,7 +108,6 @@ CREATE TABLE IF NOT EXISTS "user"
 (
     id                      INTEGER primary key autoincrement,
     username                TEXT unique NOT NULL COLLATE NOCASE,
-    password_hash           TEXT        NOT NULL,
     email                   TEXT unique NOT NULL,
     role                    TEXT        NOT NULL DEFAULT 'user',
     created_at              DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -128,11 +127,10 @@ CREATE TABLE IF NOT EXISTS "user"
     address                 TEXT        NOT NULL DEFAULT '',
     timezone                TEXT        NOT NULL DEFAULT 'UTC',
     language                TEXT        NOT NULL DEFAULT 'en_US',
-    public_email            INTEGER     NOT NULL DEFAULT 0,
-    totp_secret             TEXT
+    public_email            INTEGER     NOT NULL DEFAULT 0
 );
-insert into user (id, username, password_hash, email, totp_secret)
-values (999, 'anonymous', '', '', null);
+insert into user (id, username, email, role, active)
+values (999, 'anonymous',  '',  'phony', false);
 CREATE TABLE user_login_rewards
 (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,

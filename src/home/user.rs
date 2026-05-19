@@ -1,7 +1,7 @@
 use crate::common::{Context, CurrentUser, GlobalContext, OptionalCurrentUser, WebResponse};
 use crate::daemon::email::{EmailSenderDaemon, Mail};
 use crate::daemon::nsfw_detect::NSFWDetector;
-use crate::home::auth::{hash_password, verify_password};
+use crate::home::auth::{hash_password, verify_password, AuthLoginTemplate};
 use crate::home::{AppState, RedirectTemplate};
 use crate::store::notifications::{Notification, NotificationSearch};
 use crate::store::topic::{TopicIndex, TopicSearch, UserCommentDisplay};
@@ -320,7 +320,12 @@ pub async fn change_password_post(
         .into();
     };
 
-    if !verify_password(&form.old_password, &user.password_hash).unwrap_or(false) {
+    let password_hash = store.get_user_password(user.id).await
+        .map_err(ctx.err())?
+        .unwrap_or_default();
+    
+    // 这里如果密码为空，可以跳过密码验证
+    if !password_hash.is_empty() && !verify_password(&form.old_password, &password_hash).unwrap_or(false) {
         return ChangePasswordTemplate {
             tips: t_owned!(ctx, "user.current_password_wrong"),
             ctx: ctx.context(t_owned!(ctx, "user.change_password")),

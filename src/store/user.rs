@@ -5,6 +5,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use std::fmt::{Display, Formatter};
+use serde_json::json;
 
 // 会员连续登录信息
 #[derive(Debug, Clone, FromRow, Default, Serialize, Deserialize)]
@@ -36,7 +37,6 @@ pub struct UserIndex {
 pub struct User {
     pub id: i64,
     pub username: String,
-    pub password_hash: String,
     pub email: String,
     pub role: String,
     pub active: bool,
@@ -52,6 +52,12 @@ pub struct User {
     pub updated_at: DateTime<Utc>,
     pub last_access_date: chrono::NaiveDate,
     pub avatar_timestamp: i64,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct AttributeString {
+    date: DateTime<Utc>,
+    value: String,
 }
 
 #[derive(Debug, FromRow)]
@@ -78,6 +84,7 @@ impl Display for User {
     }
 }
 impl Store {
+    // 这个接口查询不到角色为 phony 的用户
     pub async fn search_users(
         &self,
         username: Option<String>,
@@ -89,7 +96,7 @@ impl Store {
         let total: u32 = sqlx::query_scalar(
             r#"
        SELECT count(*) FROM user
-       where (? is null or username like '%'||?||'%' )
+       where role != 'phony' and (? is null or username like '%'||?||'%' )
        and (? is null or active = ?)
        and (? is null or role = ?)
         "#,
@@ -109,7 +116,7 @@ impl Store {
                 (select count(*) from topic where user_id = user.id) as topics,
                 (select count(*) from comment where user_id = user.id) as replies
        FROM user
-       where (? is null or username like '%'||?||'%' )
+       where role != 'phony' and (? is null or username like '%'||?||'%' )
        and (? is null or active = ?)
        and (? is null or role = ?)
         ORDER BY created_at DESC
@@ -140,14 +147,14 @@ impl Store {
     }
 
     pub async fn get_user(&self, username: &str) -> sqlx::Result<Option<User>> {
-        sqlx::query_as::<_, User>("SELECT id, username, password_hash, email, role, active, unread_notifications, credit_score, coins, bio, address, timezone, language, public_email, last_access_date, created_at, updated_at, avatar_timestamp FROM user WHERE username = ?")
+        sqlx::query_as::<_, User>("SELECT id, username, email, role, active, unread_notifications, credit_score, coins, bio, address, timezone, language, public_email, last_access_date, created_at, updated_at, avatar_timestamp FROM user WHERE username = ?")
             .bind(username.to_string())
             .fetch_optional(&self.pool)
             .await
     }
 
     pub async fn get_user_by_email(&self, email: &str) -> sqlx::Result<Option<User>> {
-        sqlx::query_as::<_, User>("SELECT id, username, password_hash, email, role, active, unread_notifications, credit_score, coins, bio, address, timezone, language, public_email, last_access_date, created_at, updated_at, avatar_timestamp FROM user WHERE email = ?")
+        sqlx::query_as::<_, User>("SELECT id, username, email, role, active, unread_notifications, credit_score, coins, bio, address, timezone, language, public_email, last_access_date, created_at, updated_at, avatar_timestamp FROM user WHERE email = ?")
             .bind(email.to_string())
             .fetch_optional(&self.pool)
             .await
@@ -218,9 +225,8 @@ impl Store {
         };
 
         // 2. Create user
-        let user_id = sqlx::query(r#"INSERT INTO user (username, password_hash, email,language, role, credit_score ) VALUES (?, ?, ?, ?, 'user', ? )"#)
+        let user_id = sqlx::query(r#"INSERT INTO user (username, email,language, role, credit_score ) VALUES (?, ?, ?, 'user', ? )"#)
             .bind(username)
-            .bind(password_hash)
             .bind(email)
             .bind(language)
             .bind(initial_score)
@@ -228,9 +234,24 @@ impl Store {
             .await?
             .last_insert_rowid();
 
+        // 更新密码
+        if !password_hash.is_empty() {
+            let value = serde_json::to_string(&AttributeString {
+                date: Default::default(),
+                value: password_hash.to_string(),
+            })
+                .map_err(|e| sqlx::Error::Protocol(e.to_string()))?;
+
+            sqlx::query(r#"INSERT INTO user_attribute (id, attr, value) VALUES (?, 'password', ?) "#)
+                .bind(user_id)
+                .bind(&value)
+                .execute(&mut *tx)
+                .await?;
+        }
+
         // 更新最后访问日期和最后打卡日期，触发用户登录奖励
         let yesterday = Utc::now().date_naive() - chrono::Duration::days(2);
-        sqlx::query("UPDATE user SET last_access_date= ? , last_checkin_date= ? WHERE id = ?")
+        sqlx::query("UPDATE user SET last_access_date = ? , last_checkin_date = ? WHERE id = ?")
             .bind(&yesterday)
             .bind(&yesterday)
             .bind(user_id)
@@ -266,20 +287,15 @@ impl Store {
     }
 
     pub async fn get_totp_secret(&self, id: i64) -> sqlx::Result<Option<String>> {
-        // language=sql
-        let res:Option<String> = sqlx::query_scalar("select totp_secret from user WHERE id = ?")
-            .bind(id)
-            .fetch_optional(&self.pool)
-            .await?;
-        Ok(res.filter(|s| !s.is_empty()))
+        Ok(self.get_user_attr::<AttributeString>(id, "totp_secret").await?.map(|r|r.value))
     }
     pub async fn update_totp_secret(&self, id: i64, secret: Option<String>) -> sqlx::Result<()> {
-        sqlx::query("UPDATE user SET totp_secret = ?, updated_at = datetime('now') WHERE id = ?")
-            .bind(secret)
-            .bind(id)
-            .execute(&self.pool)
-            .await?;
-        Ok(())
+        if let Some(secret) = secret {
+            let attr = AttributeString{ date: Default::default(), value: secret };
+            self.set_user_attr(id,"totp_secret", Some(&attr)).await
+        }else{
+            self.set_user_attr::<AttributeString>(id,"totp_secret", None).await
+        }
     }
 
     pub async fn update_user_role(&self, id: i64, role: &str) -> sqlx::Result<()> {
@@ -479,15 +495,25 @@ WHERE id = ?"#,
     }
 
     pub async fn user_password_reset(&self, id: i64, password: &str) -> sqlx::Result<()> {
-        let result = sqlx::query(r#"update user set password_hash = ? where id = ?"#)
-            .bind(password)
-            .bind(id)
-            .execute(&self.pool)
-            .await?;
-        if result.rows_affected() == 1 {
-            return Ok(());
+        if password.is_empty() {
+            self.set_user_attr::<AttributeString>(id, "password", None).await
+        } else {
+            self.set_user_attr(id, "password",
+                               Some(&AttributeString {
+                                   date: Default::default(),
+                                   value: password.to_string(),
+                               }))
+                .await
         }
-        Err(sqlx::Error::RowNotFound)
+    }
+
+    pub async fn get_user_password(&self, id: i64) -> sqlx::Result<Option<String>> {
+        let value: Option<String> = sqlx::query_scalar(r#"select json_extract(value,'$.value') from user_attribute
+where id = ? and attr = 'password' "#)
+            .bind(id)
+            .fetch_optional(&self.pool)
+            .await?;
+        Ok(value)
     }
 
     pub async fn get_relation(&self, user_id: i64, target_id: i64) -> sqlx::Result<Option<String>> {

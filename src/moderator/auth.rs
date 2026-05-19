@@ -44,8 +44,16 @@ pub async fn get_access_token(
         Err(resp) => return resp,
     };
 
+    let password_hash = match store.get_user_password(user.id).await{
+        Ok(Some(password_hash)) => password_hash,
+        Ok(None) => { String::new()}
+        Err(err) => {
+            return Data::<AccessTokenResponse>::error(&err.to_string());
+        }
+    };
+
     // Verify password
-    if !verify_password(&form.password, &user.password_hash).unwrap_or(false) {
+    if !verify_password(&form.password, &password_hash).unwrap_or(false) {
         record_login_failure(&store, user.id, current_count).await;
         return Data::<AccessTokenResponse>::error("用户名或密码错误");
     }
